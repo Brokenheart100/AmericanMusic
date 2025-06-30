@@ -16,10 +16,6 @@ Flickable {
     // 启用裁剪。超出 Flickable 边界的内容将被隐藏，不会绘制到外面去。
     clip: true
 
-    // 设置 objectName 为 "CherryPick"，用于在 C++ 或其他 QML 文件中查找此页面对象。
-    // 这与上一个文件中的 onCurrentItemChanged 逻辑相对应。
-    objectName: "CherryPick"
-
     // 通过附加属性 `ScrollBar.vertical` 来访问并自定义垂直滚动条。
     // 原始代码注释提到“不然访问不到”，正是指需要通过这种方式来修改滚动条样式。
     ScrollBar.vertical: ScrollBar {
@@ -65,13 +61,15 @@ Flickable {
         // --- 以下是页面中包含的各个内容模块 ---
 
         // 轮播图模块。这是一个自定义组件，用于显示滚动的横幅图片。
-        CarouselImage {}
+        // CarouselImage {
+        //     id: carouselImage
+        //     // anchors.left: parent.left
+        //     // anchors.top: parent.top
+        // }
 
-        // // 官方歌单模块。这可能是一个展示网易云音乐官方推荐歌单的区域。
-        // // （组件名 "Sings" 可能是 "Songs" 或 "Singlists" 的笔误）。
-        // OfficalSings {}
-
+        OfficialMusic {}
         // // 最新音乐模块。用于展示最新发布的歌曲或专辑。
+        OfficialMusic {}
         // RecentMusic {}
 
         // // 精选有声书模块。展示推荐的有声读物内容。

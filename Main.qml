@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls.Basic as Basic
 
 Window {
     id: mainWindow
@@ -6,15 +7,14 @@ Window {
     height: 600
     visible: true
     title: qsTr("nmdmp")
-
     LeftPage {
         id: leftRect
         anchors.left: parent.left
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        color: "#16d27a"
-        width: 120
-        height: 100
+        anchors.bottom: bottomRect.top
+        anchors.right: rightRect.left
+        width: 150
+        // height: 400
     }
     RightPage {
         id: rightRect

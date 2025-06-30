@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
-// import "file:///E:/Computer/Qt6/AmericanMusic/RectTest.qml"
 import AmericanMusic 1.0 // <-- 使用模块名和版本号导入
 
+//ssh Brokenheart100@192.168.102.129
 Rectangle {
     id: rightPage
     TitleBar {
@@ -29,12 +29,12 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 100
         clip: true
-        // initialItem: MusicCherryPick {
-        //     anchors.fill: parent
-        //     width: 300
-        //     height: 400
-        //     clip: true
-        // }
+        initialItem: MusicCherryPick {
+            anchors.fill: parent
+            // width: 300
+            // height: 400
+            // clip: true
+        }
         // 设置StackView的背景颜色为浅蓝色
         background: Rectangle {
             color: "lightblue"

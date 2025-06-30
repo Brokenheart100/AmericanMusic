@@ -42,6 +42,7 @@ Item {
             id: musicCherryPickStackView // 为 StackView 设置 id。
             // 锚布局：使其位于标题栏下方，并填充剩余空间。
             //anchors.top: titleFlow.bottom // 顶部紧贴标题栏 'titleFlow' 的底部。
+            anchors.top: parent.top
             anchors.left: parent.left // 左侧与父元素左侧对齐。
             anchors.right: parent.right // 右侧与父元素右侧对齐。
             anchors.bottom: parent.bottom // 底部与父元素底部对齐。
@@ -61,6 +62,9 @@ Item {
             initialItem: CherryPick {
                 anchors.fill: parent
                 clip: true
+            }
+            background: Rectangle {
+                color: "orange"
             }
         }
     }
