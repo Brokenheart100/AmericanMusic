@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Window
+import QtQuick 2.15
+import QtQuick.Window 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Rectangle {
     id: rootBtn
@@ -11,41 +11,52 @@ Rectangle {
     width: parent.width
 
     // --- 数据模型 ---
-    // 定义8个按钮的文本和图标。
-    // 注意: 为了演示，这里复用了同一个图标。在实际项目中，请替换为对应的图标路径。
     ListModel {
         id: buttonModel
         ListElement {
             text: "推荐"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
         }
         ListElement {
             text: "关注"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
         ListElement {
             text: "直播"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
         ListElement {
             text: "动画"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
         ListElement {
             text: "游戏"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
         ListElement {
             text: "知识"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
         ListElement {
             text: "体育"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
         ListElement {
             text: "音乐"
-            icon: "qrc:/icons/home_icon.svg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+            icon1: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
         }
     }
 
@@ -56,23 +67,23 @@ Rectangle {
     // --- 视图 ---
     // 使用ScrollView确保按钮过多时可以滚动
     ScrollView {
-        anchors.verticalCenter: parent.verticalCenter
-
-        height: parent.height // 限制滚动视图的高度
-
+        anchors.fill: parent
         ColumnLayout {
+            // Layout.fillWidth: true
+            width: parent.width
             spacing: 10 // 按钮之间的间距
 
             // Repeater会根据model中的数据，为每一项创建一个delegate
             Repeater {
-                model: 8
+                model: buttonModel
 
                 // delegate是每个列表项的模板
                 delegate: TokyoButton {
                     // 将model中的数据绑定到按钮的属性上
                     Layout.fillWidth: true
-                    // 核心：根据currentIndex判断当前按钮是否为激活状态
-                    // model.index 是Repeater提供的当前项的索引
+                    buttonText: "ctmd"
+                    iconSource: "file:///E:/Computer/Qt6/AmericanMusic/svg/computer-fill.svg"
+
                     active: rootBtn.currentIndex === index
 
                     // 当按钮被点击时，更新全局的currentIndex
@@ -80,6 +91,25 @@ Rectangle {
                         currentIndex = index;
                     }
                 }
+            }
+            // 这就是分割线
+            Rectangle {
+                id: separator1
+                Layout.fillWidth: true
+                height: 1 // 高度为1像素
+                color: "#ed1c1c" // 浅灰色
+            }
+            CollapseList {
+                Layout.fillWidth: true
+            }
+            Rectangle {
+                id: separator2
+                Layout.fillWidth: true
+                height: 1 // 高度为1像素
+                color: "#ed1c1c" // 浅灰色
+            }
+            CollapseList {
+                Layout.fillWidth: true
             }
         }
     }

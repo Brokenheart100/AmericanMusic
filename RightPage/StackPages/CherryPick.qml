@@ -1,17 +1,17 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts 1.15
+
 import AmericanMusic 1.0
 
 // 整个“精选”页面内容较多，需要滚动才能完整浏览。
 Flickable {
     // 为根元素设置一个 id，方便内部引用。
     id: flick
+    anchors.fill: parent
 
-    // 设置可滚动内容的总高度。Flickable 需要知道内容有多高才能正确计算滚动。
-    // 注意：这里硬编码了一个 2200 的高度。在响应式布局中，更好的做法是
-    // 将 contentHeight 动态绑定到其子元素（如下面的 Column）的实际高度上，
-    // 例如 `contentHeight: aColumn.height`。
-    contentHeight: 2200
+    contentHeight: mainColumn.implicitHeight
+    contentWidth: mainColumn.implicitWidth
 
     // 启用裁剪。超出 Flickable 边界的内容将被隐藏，不会绘制到外面去。
     clip: true
@@ -48,34 +48,16 @@ Flickable {
 
     // 使用 Column 布局来垂直排列其内部的各个 UI 模块。
     // 这个 Column 是 Flickable 中实际滚动的内容。
-    Column {
-        // 使 Column 填充其父元素（Flickable）的整个内容区域。
-        anchors.fill: parent
-        // 在 Column 的顶部设置 30 像素的外边距，使其内容与页面顶部有一定距离。
-        anchors.topMargin: 30
-        // 同样启用裁剪，虽然在 Flickable 内部，这通常是多余的，但并无坏处。
-        clip: true
-        // 设置 Column 内部各个子项之间的垂直间距为 30 像素。
-        spacing: 30
+    ColumnLayout {
+        id: mainColumn
+        width: parent.width // 2. 明确让 ColumnLayout 的宽度等于 Flickable 的宽度
+        // spacing: 30 // ColumnLayout 的 spacing 属性
 
-        // --- 以下是页面中包含的各个内容模块 ---
-
-        // 轮播图模块。这是一个自定义组件，用于显示滚动的横幅图片。
-        // CarouselImage {
-        //     id: carouselImage
-        //     // anchors.left: parent.left
-        //     // anchors.top: parent.top
-        // }
-
-        OfficialMusic {}
-        // // 最新音乐模块。用于展示最新发布的歌曲或专辑。
-        OfficialMusic {}
-        // RecentMusic {}
-
-        // // 精选有声书模块。展示推荐的有声读物内容。
-        // CherryPickAudioBook {}
-
-        // // 热门播客模块。展示当前流行的播客节目。
-        // HotPodcast {}
+        PodCastWidget {
+            Layout.fillWidth: true
+        }
+        OfficialMusic {
+            Layout.fillWidth: true
+        }
     }
 }

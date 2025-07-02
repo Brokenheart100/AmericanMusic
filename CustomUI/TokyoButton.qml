@@ -5,34 +5,27 @@ import QtQuick.Layouts 1.15
 Button {
     id: control
     // --- 自定义属性 ---
-    property alias buttonText: label.text
-    property alias iconSource: icon.source
+    property string buttonText: "nmdmp"
+    property string iconSource: "file:///E:/Computer/Qt6/AmericanMusic/svg/send-plane-fill.svg"
     property bool active: false
-    // horizontalAlignment: Button.AlignLeft
-
+    leftPadding: 10
     // --- 内容项：图标和文字 ---
     contentItem: RowLayout {
         spacing: control.active ? 10 : 8 // 激活时间距也可调整
-        anchors.left: parent.left
 
-        // 2. (可选) 设置左边距
-        anchors.leftMargin: 10
-
-        // 3. 保持垂直居中
-        anchors.verticalCenter: parent.verticalCenter
         Image {
             id: icon
-            Layout.preferredWidth: 24
-            Layout.preferredHeight: 24
+            // Layout.preferredWidth: 24
+            // Layout.preferredHeight: 24
             fillMode: Image.PreserveAspectFit
-            source: "file:///E:\\Computer\\Qt6\\AmericanMusic\\svg\\computer-fill.svg"
+            source: control.iconSource
             // 根据激活状态改变图标颜色/不透明度
             opacity: control.active ? 1.0 : 0.8
         }
 
         Label {
             id: label
-            text: "推荐"
+            text: control.buttonText
             // 根据激活状态改变文字颜色和样式
             color: control.active ? "white" : "#CCCCCC"
             font.pixelSize: 20

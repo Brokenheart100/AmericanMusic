@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts 1.15
 import AmericanMusic 1.0
 
 Item {
@@ -42,10 +43,7 @@ Item {
             id: musicCherryPickStackView // 为 StackView 设置 id。
             // 锚布局：使其位于标题栏下方，并填充剩余空间。
             //anchors.top: titleFlow.bottom // 顶部紧贴标题栏 'titleFlow' 的底部。
-            anchors.top: parent.top
-            anchors.left: parent.left // 左侧与父元素左侧对齐。
-            anchors.right: parent.right // 右侧与父元素右侧对齐。
-            anchors.bottom: parent.bottom // 底部与父元素底部对齐。
+            anchors.fill: parent // 使 StackView 填充整个父元素（即这个 Item）。
 
             // 设置一个负的左边距。这是一个布局技巧。
             // 因为其父元素有一个正的左边距，这里设置一个大小相等方向相反的负边距，
@@ -59,10 +57,7 @@ Item {
             anchors.topMargin: 20
 
             // 设置初始加载的页面。当 StackView 第一次显示时，会加载并显示这个 QML 文件。
-            initialItem: CherryPick {
-                anchors.fill: parent
-                clip: true
-            }
+            initialItem: CherryPick {}
             background: Rectangle {
                 color: "orange"
             }

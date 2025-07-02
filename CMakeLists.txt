@@ -45,6 +45,11 @@ qt_add_qml_module(appAmericanMusic
         QML_FILES RightPage/StackPages/CarouselSlide.qml
         QML_FILES RightPage/StackPages/OfficialMusic.qml
         QML_FILES RightPage/StackPages/RecentMusic.qml
+        QML_FILES CustomUI/CollapseItem.qml
+        QML_FILES LeftPage/CollapseList.qml
+        QML_FILES RightPage/Component/PodCastCover.qml
+        QML_FILES RightPage/StackPages/PodCastWidget.qml
+        QML_FILES RightPage/StackPages/Carousel.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

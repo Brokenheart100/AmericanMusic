@@ -4,9 +4,9 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    width: 1000
-    height: 300
-
+    Layout.preferredWidth: 720
+    Layout.preferredHeight: 320
+    // implicitHeight: mainLayout.implicitHeight
     // 数据模型
     ListModel {
         id: singDetailModel
@@ -53,6 +53,7 @@ Item {
     }
 
     ColumnLayout {
+        id: mainLayout
         anchors.fill: parent
         spacing: 10
 

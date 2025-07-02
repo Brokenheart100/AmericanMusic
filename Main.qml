@@ -12,7 +12,7 @@ Window {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: bottomRect.top
-        anchors.right: rightRect.left
+        // anchors.right: rightRect.left
         width: 150
         // height: 400
     }
