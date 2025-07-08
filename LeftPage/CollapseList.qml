@@ -17,19 +17,19 @@ ColumnLayout {
         id: playlistModel
         ListElement {
             name: "<练习金曲>"
-            art: "file:///E:/Computer/C/QMLTest/image/3.jpg"
+            art: "file:///E:/Computer/Qt6/AmericanMusic/image/1.jpg"
         }
         ListElement {
             name: "<画面感极强的BGM>"
-            art: "file:///E:/Computer/C/QMLTest/image/3.jpg"
+            art: "file:///E:/Computer/Qt6/AmericanMusic/image/2.jpg"
         }
         ListElement {
             name: "<安静的钢琴曲>"
-            art: "file:///E:/Computer/C/QMLTest/image/3.jpg"
+            art: "file:///E:/Computer/Qt6/AmericanMusic/image/3.jpg"
         }
         ListElement {
             name: "<跑步专用>"
-            art: "file:///E:/Computer/C/QMLTest/image/3.jpg"
+            art: "file:///E:/Computer/Qt6/AmericanMusic/image/4.jpg"
         }
     }
 
@@ -58,6 +58,12 @@ ColumnLayout {
                     easing.type: Easing.InOutQuad
                 }
             }
+            MouseArea {
+                hoverEnabled: true // 启用鼠标悬停效果
+                anchors.fill: parent
+                onClicked: root.expanded = !root.expanded // 点击时切换展开状态
+                cursorShape: Qt.PointingHandCursor // (建议)悬浮时显示手形光标
+            }
         }
 
         Item {
@@ -73,12 +79,6 @@ ColumnLayout {
                 color: "#444"
                 radius: width / 2 // 圆形
             }
-        }
-
-        // 使整个标题栏可点击
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.expanded = !root.expanded // 点击时切换展开状态
         }
     }
 
@@ -103,9 +103,14 @@ ColumnLayout {
         spacing: 5
 
         delegate: CollapseItem {
+            id: collapseitem
             width: listView.width // 委托宽度与ListView一致
-
+            implicitHeight: 50 // 设置一个默认高度，ListView会根据内容自动调整
             // 从模型绑定数据
+            required property int index
+            required property string name
+            required property string art
+
             playlistName: name
             albumArt: art
 
@@ -115,6 +120,13 @@ ColumnLayout {
             // 点击时，更新当前选中项的索引
             onClicked: {
                 root.currentIndex = index;
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    root.currentIndex = collapseitem.index;
+                    console.log("Clicked item index:", collapseitem.index);
+                }
             }
         }
     }

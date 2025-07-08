@@ -1,43 +1,41 @@
 import QtQuick
 import QtQuick.Controls
-import AmericanMusic 1.0 // <-- 使用模块名和版本号导入
+import QtQuick.Layouts 1.15
 
-//ssh Brokenheart100@192.168.102.129
 Rectangle {
     id: rightPage
-    TitleBar {
-        id: titleBar
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        height: 40
-    }
-    // RectTest {
-    //     anchors.top: titleBar.bottom
-    //     anchors.left: parent.left
-    //     anchors.right: parent.right
-    //     anchors.bottom: parent.bottom
-    //     anchors.bottomMargin: 100
-    //     clip: true
-    // }
-    // 下方主页面栈区
+
+    // --- 声明 UI 结构 ---
     StackView {
         id: mainStackView
-        anchors.top: titleBar.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 100
+        anchors.fill: parent
         clip: true
-        initialItem: MusicCherryPick {
-            anchors.fill: parent
-            // width: 300
-            // height: 400
-            // clip: true
+        Component {
+            id: musicCherryPick
+            MusicCherryPick {}
         }
-        // 设置StackView的背景颜色为浅蓝色
-        background: Rectangle {
-            color: "lightblue"
+        Component {
+            id: playlistDetailPage
+            PlaylistDetailPage {}
         }
+        initialItem: MusicCherryPick {}
+    }
+
+    // --- 核心修正：正确的页面切换函数 ---
+    function setCurrentPage(index) {
+        if (index === 0) {
+            mainStackView.replace(musicCherryPick);
+        } else if (index === 1) {
+            mainStackView.replace(playlistDetailPage);
+        } else {
+            console.warn("未知的页面索引:", index);
+        }
+    }
+
+    function showPlaylist(playlistId) {
+    // 这个函数用于打开特定的歌单详情页
+    // mainStackView.push(playlistPage, {
+    //     "playlistId": playlistId
+    // }); // 可以传递参数
     }
 }

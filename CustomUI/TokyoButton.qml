@@ -7,44 +7,69 @@ Button {
     // --- 自定义属性 ---
     property string buttonText: "nmdmp"
     property string iconSource: "file:///E:/Computer/Qt6/AmericanMusic/svg/send-plane-fill.svg"
-    property bool active: false
+    property bool active: false // 用于标记按钮是否被激活
     leftPadding: 10
+    checkable: true
+
     // --- 内容项：图标和文字 ---
     contentItem: RowLayout {
-        spacing: control.active ? 10 : 8 // 激活时间距也可调整
-
+        anchors.verticalCenter: parent.verticalCenter
         Image {
             id: icon
-            // Layout.preferredWidth: 24
-            // Layout.preferredHeight: 24
             fillMode: Image.PreserveAspectFit
             source: control.iconSource
-            // 根据激活状态改变图标颜色/不透明度
-            opacity: control.active ? 1.0 : 0.8
+            opacity: control.hovered ? 1.0 : 0.8
         }
 
         Label {
             id: label
             text: control.buttonText
             // 根据激活状态改变文字颜色和样式
-            color: control.active ? "white" : "#CCCCCC"
+            color: control.hovered ? "white" : "#CCCCCC"
             font.pixelSize: 20
             font.bold: control.active // 激活时加粗
+        }
+        Item {
+            Layout.fillWidth: true // 这个弹簧会占据所有剩余空间
         }
     }
 
     // --- 背景项：根据激活状态显示不同背景 ---
     background: Rectangle {
-        // 如果是激活状态，显示红色背景；否则为透明
+        radius: 8
+        border.width: 1
         color: {
             if (control.active) {
-                return control.down ? "#E04848" : "#F85151"; // 激活时的红色
+                // --- 状态1: 已选中 ---
+                return "#F85151"; // 选中时为红色，按下时更深
+            } else if (control.hovered) {
+                // --- 状态2: 未选中，但悬浮 ---
+                return "#9f9c9c"; // 悬浮时为半透明灰色 (可以调整)
             } else {
-                return control.down ? "#444444" : "transparent"; // 非激活时，按下给个反馈
+                // --- 状态3: 普通状态 (未选中，未悬浮) ---
+                return "transparent"; // 普通状态为透明
             }
         }
-        radius: 16
-        border.color: (!control.active && control.hovered) ? "#555555" : "transparent"
-        border.width: 1
+
+        border.color: {
+            if (control.active) {
+                return "transparent"; // 选中时不需要边框
+            } else if (control.hovered) {
+                return "#666666"; // 悬浮时给个边框
+            } else {
+                return "#444444"; // 普通状态给个更暗的边框
+            }
+        }
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 200
+            }
+        }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 200
+            }
+        }
     }
 }

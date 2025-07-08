@@ -10,6 +10,7 @@ find_package(Qt6 COMPONENTS
     Widgets 
     QuickControls2 
     Svg 
+    Multimedia
 REQUIRED)
 
 set(ZLIB_ROOT "D:/vcpkg/vcpkg/installed/x64-windows" CACHE PATH "")
@@ -37,7 +38,7 @@ qt_add_qml_module(appAmericanMusic
         QML_FILES CustomUI/TokyoButton.qml
         QML_FILES src/title/Title.qml
         QML_FILES BottomBar/BottomBar.qml
-        QML_FILES RightPage/TitleBar/TitleBar.qml
+        QML_FILES TitleBar/TitleBar.qml
         QML_FILES RightPage/StackPages/MusicCherryPick.qml
         QML_FILES RightPage/StackPages/CherryPick.qml
         QML_FILES RightPage/StackPages/CarouselImage.qml
@@ -50,6 +51,23 @@ qt_add_qml_module(appAmericanMusic
         QML_FILES RightPage/Component/PodCastCover.qml
         QML_FILES RightPage/StackPages/PodCastWidget.qml
         QML_FILES RightPage/StackPages/Carousel.qml
+        QML_FILES RightPage/StackPages/HoverCard.qml
+        QML_FILES RightPage/StackPages/RankingCard.qml
+        QML_FILES RightPage/StackPages/RankingPage.qml
+        QML_FILES RightPage/StackPages/SongItem.qml
+        QML_FILES RightPage/StackPages/ArticleCard.qml
+        QML_FILES TitleBar/IconButton.qml
+        QML_FILES TitleBar/SearchField.qml
+        QML_FILES TitleBar/UserProfile.qml
+        QML_FILES BottomBar/IconButton1.qml
+        QML_FILES BottomBar/SongInfo.qml
+        QML_FILES LeftPage/ExpandButton.qml
+        QML_FILES LeftPage/CollapseList1.qml
+        QML_FILES RightPage/StackPages/LocalMusic/SongItem1.qml
+        QML_FILES RightPage/StackPages/LocalMusic/PlaylistHeader.qml
+        QML_FILES RightPage/StackPages/LocalMusic/PlaylistDetailPage.qml
+        QML_FILES BottomBar/MusicPlayer.qml
+
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -70,6 +88,7 @@ target_link_libraries(appAmericanMusic
     Qt6::Svg 
     Qt6::Qml
     ZLIB::ZLIB  # 显式链接ZLIB
+    Qt6::Multimedia
 
 )
 

@@ -3,18 +3,14 @@ import QtQuick.Controls 2.15
 
 Item {
     id: root
-
-    // --- 自定义属性 ---
-    // 允许从外部设置封面图片源
     property alias imageSource: coverImage.source
     property alias tagText1: tagLabel1.text
     property alias tagText2: tagLabel2.text
     property bool hovered: mouseArea.hovered // 用于指示鼠标是否悬停在组件上
 
     // 推荐尺寸
-    width: 150
-    height: 150
- 
+    implicitWidth: 80
+    implicitHeight: 80
     // --- 关键点 1: 定义一个 Scale 变换 ---
     transform: Scale {
         id: scaleTransform
@@ -89,7 +85,7 @@ Item {
         id: tagName
         anchors.left: parent.left
         anchors.top: parent.top
-        anchors.margins: 10
+        anchors.margins: 5
 
         // 尺寸自适应文字内容
         width: tagLabel1.implicitWidth + 12
@@ -113,7 +109,7 @@ Item {
         // 定位在左下角
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.margins: 10
+        anchors.margins: 5
 
         // 尺寸自适应文字内容
         width: tagLabel2.implicitWidth + 12

@@ -1,0 +1,222 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts 1.15
+
+import AmericanMusic 1.0
+
+Flickable {
+    id: flick
+    anchors.fill: parent
+    contentHeight: mainColumn.implicitHeight
+    contentWidth: mainColumn.implicitWidth
+    clip: true
+
+    ScrollBar.vertical: ScrollBar {
+        id: cusScrollBar // 为滚动条设置 id。
+
+        // 使用锚布局将滚动条定位在父元素（Flickable）的右侧。
+        anchors.right: parent.right
+        // 设置距离右侧边缘 5 像素的边距。
+        anchors.rightMargin: 5
+        // 设置滚动条的宽度为 10 像素。
+        width: 10
+        // 设置滚动条的显示策略为 AsNeeded，即“按需显示”。
+        // 只有当内容高度 (contentHeight) 超过 Flickable 的可视高度时，滚动条才会出现。
+        policy: ScrollBar.AsNeeded
+
+        contentItem: Rectangle {
+            implicitWidth: 10
+            implicitHeight: 10
+            // 设置滑块的圆角半径，使其边角平滑。
+            radius: 4
+            // 设置滑块的颜色。
+            color: "#4141ee"
+        }
+    }
+
+    // 使用 Column 布局来垂直排列其内部的各个 UI 模块。
+    ColumnLayout {
+        id: mainColumn
+        width: parent.width // 2. 明确让 ColumnLayout 的宽度等于 Flickable 的宽度
+        spacing: 20 // ColumnLayout 的 spacing 属性
+        anchors.horizontalCenter: parent.horizontalCenter
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            Carousel {
+                id: myCarousel
+                Layout.preferredWidth: 300 // 设置 PodCastWidget 的宽度
+                Layout.preferredHeight: 150
+            }
+
+            PodCastWidget {
+                Layout.preferredWidth: 400 // 设置 PodCastWidget 的宽度
+                Layout.preferredHeight: 150
+            }
+        }
+        Label {
+            text: "精选歌单>"
+            font {
+                bold: true
+                family: "黑体"
+                pixelSize: 24
+            }
+            color: "white"
+            // Layout.leftMargin: 10
+        }
+        RowLayout {
+            spacing: 20
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter // 1. 设置 ColumnLayout 的水平对齐方式为居中
+
+            HoverCard {}
+            HoverCard {}
+            HoverCard {}
+            HoverCard {}
+            HoverCard {}
+        }
+        Label {
+            text: "榜单精选>"
+            font {
+                bold: true
+                family: "黑体"
+                pixelSize: 24
+            }
+            color: "white"
+        }
+        GridLayout {
+            id: grid1
+            Layout.fillWidth: true
+            columns: 2
+            columnSpacing: 20
+            rowSpacing: 20
+            Layout.alignment: Qt.AlignHCenter // 1. 设置 ColumnLayout 的水平对齐方式为居中
+            RankingCard {}
+            RankingCard {}
+            RankingCard {}
+            RankingCard {}
+        }
+
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter // 1. 设置 ColumnLayout 的水平对齐方式为居中
+            Label {
+                text: "为你推荐的歌曲>"
+                font {
+                    bold: true
+                    family: "黑体"
+                    pixelSize: 24
+                }
+                color: "white"
+            }
+            Button {
+                background: Rectangle {
+                    color: "#AAAAAA"
+                    radius: 4
+                }
+
+                // 完全自定义内容
+                contentItem: RowLayout {
+                    spacing: 8 // 图标和文字的间距
+
+                    Image {
+                        source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-line.svg"
+                        width: 16
+                        height: 16
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Label {
+                        text: "播放" // 文字在这里定义
+                        color: "white"
+                        font.pixelSize: 16
+                    }
+                }
+            }
+            Item {
+                Layout.fillWidth: true // 这个 Item 会占据所有剩余的水平空间
+            }
+            Button {
+                text: "更多"
+                icon.source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-line.svg"
+                Layout.rightMargin: 30
+                background: Rectangle {
+                    color: "#AAAAAA"
+                    radius: 4
+                }
+            }
+        }
+        GridLayout {
+            id: grid2
+            Layout.fillWidth: true
+            columns: 2
+            columnSpacing: 20
+            rowSpacing: 20
+            Layout.alignment: Qt.AlignHCenter // 1. 设置 ColumnLayout 的水平对齐方式为居中
+
+            SongItem {}
+            SongItem {}
+            SongItem {}
+            SongItem {}
+        }
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter // 1. 设置 ColumnLayout 的水平对齐方式为居中
+            Label {
+                text: "为你推荐的歌曲>"
+                font {
+                    bold: true
+                    family: "黑体"
+                    pixelSize: 24
+                }
+                color: "white"
+            }
+            Button {
+
+                background: Rectangle {
+                    color: "#AAAAAA"
+                    radius: 4
+                }
+
+                // 完全自定义内容
+                contentItem: RowLayout {
+                    spacing: 8 // 图标和文字的间距
+
+                    Image {
+                        source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-line.svg"
+                        width: 16
+                        height: 16
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Label {
+                        text: "播放" // 文字在这里定义
+                        color: "white"
+                        font.pixelSize: 16
+                    }
+                }
+            }
+            Item {
+                Layout.fillWidth: true // 这个 Item 会占据所有剩余的水平空间
+            }
+            Button {
+                text: "更多"
+                icon.source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-line.svg"
+                Layout.rightMargin: 30
+                background: Rectangle {
+                    color: "#AAAAAA"
+                    radius: 4
+                }
+            }
+        }
+        GridLayout {
+            id: grid3
+            Layout.fillWidth: true
+            columns: 2
+            columnSpacing: 20
+            rowSpacing: 20
+            Layout.alignment: Qt.AlignHCenter // 1. 设置 ColumnLayout 的水平对齐方式为居中
+            ArticleCard {}
+            ArticleCard {}
+            ArticleCard {}
+            ArticleCard {}
+        }
+    }
+}
