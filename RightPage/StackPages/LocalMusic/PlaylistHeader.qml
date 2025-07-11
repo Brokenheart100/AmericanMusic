@@ -1,9 +1,15 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls
+import Qt.labs.platform 1.1
 
 RowLayout {
+    id: root
     spacing: 25
+    signal playAllClicked
+    // 当用户通过文件对话框选择了文件夹后，发出此信号，并附带文件夹的 URL
+    signal addFilesClicked(url folderUrl)
+    signal filesSelected(var fileUrls)
     //专辑封面
     Image {
         id: coverImage
@@ -19,7 +25,6 @@ RowLayout {
 
     ColumnLayout {
         Layout.fillHeight: true
-        // Layout.alignment: Qt.AlignTop
         Layout.fillWidth: true
         spacing: 15
 
@@ -101,6 +106,16 @@ RowLayout {
                 background: Rectangle {
                     color: "#3A3A3A"
                     radius: height / 5
+                }
+            }
+            FileDialog {
+                id: fileDialog
+                title: "请选择一个音频文件"
+                fileMode: FileDialog.OpenFiles
+                nameFilters: ["音频文件 (*.mp3 *.wav *.flac *.m4a)"]
+                folder: Qt.resolvedUrl(".")
+                onAccepted: {
+                    root.filesSelected(files);
                 }
             }
             Button {

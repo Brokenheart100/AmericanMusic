@@ -10,11 +10,11 @@ find_package(Qt6 COMPONENTS
     Widgets 
     QuickControls2 
     Svg 
+    Core
     Multimedia
+    Widgets
 REQUIRED)
 
-set(ZLIB_ROOT "D:/vcpkg/vcpkg/installed/x64-windows" CACHE PATH "")
-find_package(ZLIB REQUIRED)
     
     
 
@@ -67,6 +67,13 @@ qt_add_qml_module(appAmericanMusic
         QML_FILES RightPage/StackPages/LocalMusic/PlaylistHeader.qml
         QML_FILES RightPage/StackPages/LocalMusic/PlaylistDetailPage.qml
         QML_FILES BottomBar/MusicPlayer.qml
+        QML_FILES MusicPlayerManager.qml
+        QML_FILES SongListModel.qml
+        SOURCES qmldir
+        SOURCES playlistmodel.h playlistmodel.cpp
+        SOURCES musicplayer.h musicplayer.cpp
+        QML_FILES RightPage/StackPages/LocalMusic/HeaderButton.qml
+
 
 )
 
@@ -87,8 +94,9 @@ target_link_libraries(appAmericanMusic
     Qt6::QuickControls2
     Qt6::Svg 
     Qt6::Qml
-    ZLIB::ZLIB  # 显式链接ZLIB
     Qt6::Multimedia
+    Qt6::Widgets
+    Qt::Core
 
 )
 

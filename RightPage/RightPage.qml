@@ -4,7 +4,10 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: rightPage
-
+    Component.onCompleted: {
+        console.log("RightPage initialized");
+        setCurrentPage(1); // 默认显示音乐精选页面
+    }
     // --- 声明 UI 结构 ---
     StackView {
         id: mainStackView

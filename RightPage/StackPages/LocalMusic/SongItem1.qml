@@ -7,13 +7,13 @@ Rectangle {
     // 数据属性
     property int rank: 1
     property string coverSource: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/0.jpg"
-    property string title: "STAY"
+    property string title1: "STAY"
 
     property string artist: "The Kid LAROI / Justin Bieber"
     property string album: "STAY"
     property string duration: "02:21"
     property var tags: []
-
+    signal clicked
     // 视觉属性
     width: parent.width
     height: 60
@@ -22,6 +22,7 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        onClicked: root.clicked()
     }
     color: mouseArea.containsMouse ? "#babab1" : "transparent"
     Behavior on color {
@@ -38,7 +39,7 @@ Rectangle {
         Item {
             id: rankPlayContainer
             Layout.preferredWidth: 20
-            Layout.preferredHeight: parent.height
+            Layout.preferredHeight: 20
 
             Label { // 序号
                 id: rankLabel
@@ -65,7 +66,7 @@ Rectangle {
             Layout.preferredHeight: 40
             Rectangle {
                 anchors.fill: parent
-                radius: 4
+                radius: 10
                 color: "transparent"
             }
         }
@@ -73,14 +74,15 @@ Rectangle {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: songListHeader.titleHeader.width
             spacing: 4
-            RowLayout {
-                Label {
-                    id: titleLabel
-                    text: root.title
-                    color: "white"
-                    font.pixelSize: 16
-                }
+            Label {
+                id: titleLabel
+                text: root.title1
+                color: "white"
+                font.pixelSize: 16
+                elide: Text.ElideRight
+                Layout.preferredWidth: 250 // 留出专辑、喜欢、时长的空间
             }
             Label {
                 id: artistLabel
@@ -88,6 +90,7 @@ Rectangle {
                 color: "#888"
                 font.pixelSize: 13
                 elide: Text.ElideRight
+                Layout.preferredWidth: 250 // 留出专辑、喜欢、时长的空间
             }
         }
         // --- 4. 悬浮时出现的操作按钮 ---
@@ -95,8 +98,6 @@ Rectangle {
             id: actionButtons
             spacing: 15
             opacity: 0 // 默认透明
-            Layout.preferredWidth: 0 // 默认宽度为0
-
             Image {
                 source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
                 Layout.preferredWidth: 20

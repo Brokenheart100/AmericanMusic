@@ -115,8 +115,6 @@ Rectangle {
         }
     }
 
-    // --- 辅助函数 (无需改动) ---
-    // --- 核心修正：在这里粘贴完整的辅助函数 ---
     function formatTime(ms) {
         if (isNaN(ms) || ms <= 0) {
             return "00:00";

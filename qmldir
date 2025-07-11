@@ -1,0 +1,2 @@
+module AmericanMusic
+singleton MusicPlayerManager 1.0 MusicPlayerManager.qml

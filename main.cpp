@@ -3,12 +3,16 @@
 #include "pathutils.h"
 #include <QQmlContext>
 #include <QQuickStyle>
+#include "musicplayer.h"
+#include <QApplication> // <-- 修改头文件
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     QQuickStyle::setStyle("Material");
     QQmlApplicationEngine engine;
+    MusicPlayer musicPlayer;
+    engine.rootContext()->setContextProperty("musicPlayer", &musicPlayer);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,

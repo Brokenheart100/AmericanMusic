@@ -1,10 +1,14 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtMultimedia 5.15
+import QtQml.Models 2.15       // 2. 确保导入了 Models 模块
+import Qt.labs.platform 1.1
 
 Rectangle {
     id: page
     color: "#cba3a3" // 整体背景色
+    property var fileQueue: [] // 这就是我们的“处理队列”，用来存放待处理的文件URL
 
     // --- 数据模型 ---
     ListModel {
@@ -42,13 +46,40 @@ Rectangle {
             coverSource1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/3.jpg"
         }
     }
-
+    Component.onCompleted: {
+        //E:\Computer\Qt6\test2\music
+        const fileUrl = "file:///E:/Computer/Qt6/test2/music";
+        musicPlayer.addSongsFromFolder(fileUrl);
+        console.log("Initial folder added:", fileUrl);
+    }
     // --- 整体布局 ---
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 30
         spacing: 20
-
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+            return minutes + ":" + seconds;
+        }
+        Component.onCompleted: {
+            //E:\Computer\Qt6\test2\music
+            const fileUrl = "file:///E:/Computer/Qt6/test2/music";
+            musicPlayer.addSongsFromFolder(fileUrl);
+            console.log("Initial folder added:", fileUrl);
+        }
+        FileDialog {
+            id: folderDialog
+            title: "请选择一个音乐文件夹"
+            fileMode: FileDialog.OpenFile // 明确指定为打开单个文件模式
+            nameFilters: ["音乐文件 (*.mp3 *.wav *.flac *.m4a)"]
+            folder: Qt.resolvedUrl(".")
+            onAccepted: {
+                musicPlayer.addSongsFromFolder(fileUrl);
+                // console.log("Selected folder:", fileUrl.toString());
+            }
+        }
         // --- 1. 顶部歌单信息区 ---
         PlaylistHeader {
             Layout.fillWidth: true
@@ -125,36 +156,48 @@ Rectangle {
             currentIndex: tabBar.currentIndex
             ColumnLayout {
                 // --- 3. 歌曲列表表头 ---
+                // 在 PlaylistDetailPage.qml 中
+                // --- 3. 歌曲列表表头 ---
                 RowLayout {
-                    id: songListHeader
+                    id: songListHeader // 这个 id 至关重要！
                     Layout.fillWidth: true
-                    Layout.leftMargin: 10
-                    Layout.rightMargin: 10
+                    Layout.preferredHeight: 40
+                    spacing: 15 // 列之间的间距
 
-                    Label {
+                    // ✅ 在这里定义每一列的 id 和宽度
+                    // 这是我们对齐的“单一事实来源”
+
+                    HeaderButton {
+                        id: rankHeader // 序号列的 id
                         text: "#"
-                        color: "#888"
-                        Layout.preferredWidth: 30
+                        hoverable: false // 序号列不可交互
+                        Layout.preferredWidth: 40
                     }
-                    Label {
+
+                    HeaderButton {
+                        id: titleHeader // 标题列的 id
                         text: "标题"
-                        color: "#888"
+                        sortIndicatorText: "↓ 默认排序"
+                        // 使用 fillWidth 让它自动填充剩余空间
                         Layout.fillWidth: true
                     }
-                    Label {
+
+                    HeaderButton {
+                        id: albumHeader // 专辑列的 id
                         text: "专辑"
-                        color: "#888"
-                        Layout.preferredWidth: 150
+                        Layout.preferredWidth: 200
                     }
-                    Label {
+
+                    HeaderButton {
+                        id: likeHeader // 喜欢列的 id
                         text: "喜欢"
-                        color: "#888"
-                        Layout.preferredWidth: 30
+                        Layout.preferredWidth: 60
                     }
-                    Label {
+
+                    HeaderButton {
+                        id: durationHeader // 时长列的 id
                         text: "时长"
-                        color: "#888"
-                        Layout.preferredWidth: 50
+                        Layout.preferredWidth: 80
                     }
                 }
 
@@ -164,7 +207,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    model: songModel
+                    model: musicPlayer.playlistModel
                     spacing: 5
                     clip: true
 
@@ -172,21 +215,24 @@ Rectangle {
                         // 将模型数据绑定到 delegate
                         width: parent.width
                         required property int index
-                        required property string rank1
-                        required property string title1
-                        required property string album1
-                        required property string artist1
-                        required property string duration1
-                        required property string coverSource1
-                        rank: rank1
-                        title: title1
-                        artist: artist1
-                        album: album1
-                        duration: duration1
-                        coverSource: coverSource1
+                        required property int rank
+                        required property string title
+                        required property string album
+                        required property string artist
+                        required property string duration
+                        required property string coverSource
+                        rank: index + 1
+                        title1: title
+                        artist: artist
+                        album: album
+                        duration: duration
+                        coverSource: coverSource
+                        onClicked: {
+                            musicPlayer.play(index);
+                        }
                         Component.onCompleted: {
                             // 这里可以执行一些初始化代码
-                            console.log("SongItem1 created for:", title, "by", artist, "at index", index);
+                            console.log("SongItem1 created for:", title1, "by", artist, "at index", index);
                         }
                     }
 
@@ -195,19 +241,6 @@ Rectangle {
                     }
                 }
             }
-        }
-        // --- 3b. 第二个页面：评论 (占位符) ---
-        Label {
-            text: "评论页面 - 待实现"
-            color: "white"
-            Layout.alignment: Qt.AlignCenter
-        }
-
-        // --- 3c. 第三个页面：收藏者 (占位符) ---
-        Label {
-            text: "收藏者页面 - 待实现"
-            color: "white"
-            Layout.alignment: Qt.AlignCenter
         }
     }
 }
