@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
@@ -9,7 +10,13 @@ Rectangle {
     id: page
     color: "#cba3a3" // 整体背景色
     property var fileQueue: [] // 这就是我们的“处理队列”，用来存放待处理的文件URL
+    property string coverSource: {
+        // 1. 生成 0 到 50 之间的随机整数
+        var randomNumber = Math.floor(Math.random() * 51); // Math.random() * (max + 1)
 
+        // 2. 构造文件路径字符串
+        return "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/" + randomNumber + ".jpg";
+    }
     // --- 数据模型 ---
     ListModel {
         id: songModel
@@ -54,6 +61,7 @@ Rectangle {
     }
     // --- 整体布局 ---
     ColumnLayout {
+        id: rootLayout
         anchors.fill: parent
         anchors.margins: 30
         spacing: 20
@@ -155,23 +163,26 @@ Rectangle {
             // --- 核心：将 StackLayout 的当前索引与 TabBar 同步 ---
             currentIndex: tabBar.currentIndex
             ColumnLayout {
-                // --- 3. 歌曲列表表头 ---
-                // 在 PlaylistDetailPage.qml 中
+
                 // --- 3. 歌曲列表表头 ---
                 RowLayout {
                     id: songListHeader // 这个 id 至关重要！
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
                     spacing: 15 // 列之间的间距
+                    // 计算可用于比例分配的总宽度
+                    // 总宽度 = 父级宽度 - 所有固定列的宽度 - 所有间距
+                    readonly property real availableWidth: page.width - 60
 
-                    // ✅ 在这里定义每一列的 id 和宽度
-                    // 这是我们对齐的“单一事实来源”
-
+                    Component.onCompleted: {
+                        console.log("Available width for proportionate columns:", availableWidth);
+                    }
                     HeaderButton {
                         id: rankHeader // 序号列的 id
                         text: "#"
                         hoverable: false // 序号列不可交互
-                        Layout.preferredWidth: 40
+                        // Layout.preferredWidth: 40
+                        Layout.preferredWidth: songListHeader.availableWidth * 0.03
                     }
 
                     HeaderButton {
@@ -179,25 +190,32 @@ Rectangle {
                         text: "标题"
                         sortIndicatorText: "↓ 默认排序"
                         // 使用 fillWidth 让它自动填充剩余空间
-                        Layout.fillWidth: true
+                        // Layout.fillWidth: true
+                        // Layout.preferredWidth: 400
+                        Layout.preferredWidth: songListHeader.availableWidth * 0.54
                     }
 
                     HeaderButton {
                         id: albumHeader // 专辑列的 id
                         text: "专辑"
-                        Layout.preferredWidth: 200
+                        // Layout.preferredWidth: 200
+                        Layout.preferredWidth: songListHeader.availableWidth * 0.25
                     }
 
                     HeaderButton {
                         id: likeHeader // 喜欢列的 id
                         text: "喜欢"
-                        Layout.preferredWidth: 60
+                        // Layout.preferredWidth: 40
+                        Layout.preferredWidth: songListHeader.availableWidth * 0.05
+
+                        hoverable: false // 喜欢列不可交互
                     }
 
                     HeaderButton {
                         id: durationHeader // 时长列的 id
                         text: "时长"
-                        Layout.preferredWidth: 80
+                        // Layout.preferredWidth: 60
+                        Layout.preferredWidth: songListHeader.availableWidth * 0.08
                     }
                 }
 
@@ -215,7 +233,6 @@ Rectangle {
                         // 将模型数据绑定到 delegate
                         width: parent.width
                         required property int index
-                        required property int rank
                         required property string title
                         required property string album
                         required property string artist
@@ -223,16 +240,16 @@ Rectangle {
                         required property string coverSource
                         rank: index + 1
                         title1: title
-                        artist: artist
-                        album: album
-                        duration: duration
-                        coverSource: coverSource
+                        artist1: artist
+                        album1: album
+                        duration1: rootLayout.formatTime(duration)
+                        coverSource1: coverSource
                         onClicked: {
                             musicPlayer.play(index);
                         }
                         Component.onCompleted: {
                             // 这里可以执行一些初始化代码
-                            console.log("SongItem1 created for:", title1, "by", artist, "at index", index);
+                            console.log("SongItem1 created for:", title1, "by", artist, "at index", index, coverSource);
                         }
                     }
 

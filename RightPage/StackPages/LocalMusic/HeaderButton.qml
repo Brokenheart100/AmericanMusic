@@ -42,6 +42,9 @@ Item {
             opacity: 0
             Layout.alignment: Qt.AlignVCenter
         }
+        Item {
+            Layout.fillWidth: true // 填充剩余空间
+        }
     }
 
     // 交互
@@ -58,16 +61,13 @@ Item {
             name: "hovered"
             when: root.hoverable && mouseArea.containsMouse
             PropertyChanges {
-                target: background
-                color: "#3C444C"
+                background.color: "#3C444C"
             }
             PropertyChanges {
-                target: titleLabel
-                color: "white"
+                titleLabel.color: "white"
             }
             PropertyChanges {
-                target: sortIndicatorLabel
-                opacity: 1
+                sortIndicatorLabel.opacity: 1
             }
         }
     ]

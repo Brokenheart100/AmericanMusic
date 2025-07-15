@@ -14,6 +14,7 @@ find_package(Qt6 COMPONENTS
     Multimedia
     Widgets
 REQUIRED)
+find_package(TagLib REQUIRED)
 
     
     
@@ -97,7 +98,7 @@ target_link_libraries(appAmericanMusic
     Qt6::Multimedia
     Qt6::Widgets
     Qt::Core
-
+    TagLib::tag 
 )
 
 include(GNUInstallDirs)

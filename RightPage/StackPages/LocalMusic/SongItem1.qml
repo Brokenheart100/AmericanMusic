@@ -6,13 +6,12 @@ Rectangle {
     id: root
     // 数据属性
     property int rank: 1
-    property string coverSource: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/0.jpg"
+    property string coverSource1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/0.jpg"
     property string title1: "STAY"
-
-    property string artist: "The Kid LAROI / Justin Bieber"
-    property string album: "STAY"
-    property string duration: "02:21"
-    property var tags: []
+    property string artist1: "The Kid LAROI / Justin Bieber"
+    property string album1: "STAY"
+    property string duration1: "02:21"
+    property bool isCurrent: false // 是否是当前播放项
     signal clicked
     // 视觉属性
     width: parent.width
@@ -31,10 +30,13 @@ Rectangle {
         }
     }
     RowLayout {
+        id: contentLayout
         anchors.fill: parent
         anchors.leftMargin: 10
         anchors.rightMargin: 10
         spacing: 15
+        readonly property real availableWidth: contentLayout.width - 60
+
         // --- 1. 序号 / 播放按钮区域 ---
         Item {
             id: rankPlayContainer
@@ -51,7 +53,7 @@ Rectangle {
             Image { // 播放按钮
                 id: playIcon
                 anchors.centerIn: parent
-                source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg" // 一个灰色的播放图标
+                source: root.coverSource1 // 一个灰色的播放图标
                 width: 24
                 height: 24
                 opacity: 0 // 默认隐藏
@@ -59,73 +61,79 @@ Rectangle {
         }
 
         // --- 2. 封面图 ---
-        Image {
-            id: coverImage
-            source: root.coverSource
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            Rectangle {
-                anchors.fill: parent
-                radius: 10
-                color: "transparent"
-            }
-        }
-        // --- 3. 歌曲信息 (标题、标签、作者) ---
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignVCenter
-            Layout.preferredWidth: songListHeader.titleHeader.width
-            spacing: 4
-            Label {
-                id: titleLabel
-                text: root.title1
-                color: "white"
-                font.pixelSize: 16
-                elide: Text.ElideRight
-                Layout.preferredWidth: 250 // 留出专辑、喜欢、时长的空间
-            }
-            Label {
-                id: artistLabel
-                text: root.artist
-                color: "#888"
-                font.pixelSize: 13
-                elide: Text.ElideRight
-                Layout.preferredWidth: 250 // 留出专辑、喜欢、时长的空间
-            }
-        }
-        // --- 4. 悬浮时出现的操作按钮 ---
         RowLayout {
-            id: actionButtons
-            spacing: 15
-            opacity: 0 // 默认透明
+            Layout.preferredWidth: contentLayout.availableWidth * 0.45
             Image {
-                source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 20
+                id: coverImage
+                source: root.coverSource1
+                Layout.preferredWidth: 40
+                Layout.preferredHeight: 40
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 10
+                    color: "transparent"
+                }
             }
-            Image {
-                source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 20
+            // --- 3. 歌曲信息 (标题、标签、作者) ---
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                spacing: 4
+                Label {
+                    id: titleLabel
+                    text: root.title1
+                    color: "white"
+                    font.pixelSize: 16
+                    elide: Text.ElideRight
+                    Layout.preferredWidth: 250 // 留出专辑、喜欢、时长的空间
+                }
+                Label {
+                    id: artistLabel
+                    text: root.artist1
+                    color: "#888"
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                    Layout.preferredWidth: 250 // 留出专辑、喜欢、时长的空间
+                }
             }
-            Image {
-                source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 20
+            Item {
+                Layout.fillWidth: true // 填充剩余空间
             }
-            Image {
-                source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 20
+            // --- 4. 悬浮时出现的操作按钮 ---
+            RowLayout {
+                id: actionButtons
+                spacing: 15
+                opacity: 0 // 默认透明
+                Image {
+                    source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                }
+                Image {
+                    source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                }
+                Image {
+                    source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                }
+                Image {
+                    source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-circle-fill.svg"
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                }
             }
         }
-
         // --- 5. 专辑、喜欢、时长 ---
         Label {
             id: albumLabel
-            text: root.album
+            text: root.album1
             color: "#888"
-            Layout.preferredWidth: 150
+            // Layout.preferredWidth: 150
+            Layout.preferredWidth: contentLayout.availableWidth * 0.3
+
             elide: Text.ElideRight
         }
         Image {
@@ -136,9 +144,10 @@ Rectangle {
         }
         Label {
             id: durationLabel
-            text: root.duration
+            text: root.duration1
             color: "#888"
             font.pixelSize: 14
+            Layout.preferredWidth: contentLayout.availableWidth * 0.08
         }
     }
     // --- 核心：状态和过渡 ---

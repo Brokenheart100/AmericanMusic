@@ -1,0 +1,496 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import QtMultimedia 5.15
+import QtQml.Models 2.15       // 2. 确保导入了 Models 模块
+import Qt.labs.platform 1.1
+
+Rectangle {
+    id: page
+    color: "#cba3a3" // 整体背景色
+    property var fileQueue: [] // 这就是我们的“处理队列”，用来存放待处理的文件URL
+
+    // --- 数据模型 ---
+    ListModel {
+        id: songModel
+        ListElement {
+            rank1: 1
+            title1: "STAY"
+            artist1: "The Kid LAROI / Justin Bieber"
+            album1: "STAY"
+            duration1: "02:21"
+            coverSource1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/0.jpg"
+        }
+        ListElement {
+            rank1: 2
+            title1: "Rolling in the Deep"
+            artist1: "Adele"
+            album1: "Rolling in the Deep"
+            duration1: "03:48"
+            coverSource1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/1.jpg"
+        }
+        ListElement {
+            rank1: 3
+            title1: "Rolling in the Deep"
+            artist1: "Adele"
+            album1: "Rolling in the Deep"
+            duration1: "03:48"
+            coverSource1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/2.jpg"
+        }
+        ListElement {
+            rank1: 4
+            title1: "Rolling in the Deep"
+            artist1: "Adele"
+            album1: "Rolling in the Deep"
+            duration1: "03:48"
+            coverSource1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/3.jpg"
+        }
+    }
+    Component.onCompleted: {
+        //E:\Computer\Qt6\test2\music
+        const fileUrl = "file:///E:/Computer/Qt6/test2/music";
+        musicPlayer.addSongsFromFolder(fileUrl);
+        console.log("Initial folder added:", fileUrl);
+    }
+    // --- 整体布局 ---
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 30
+        spacing: 20
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+            return minutes + ":" + seconds;
+        }
+        Component.onCompleted: {
+            //E:\Computer\Qt6\test2\music
+            const fileUrl = "file:///E:/Computer/Qt6/test2/music";
+            musicPlayer.addSongsFromFolder(fileUrl);
+            console.log("Initial folder added:", fileUrl);
+        }
+        FileDialog {
+            id: folderDialog
+            title: "请选择一个音乐文件夹"
+            fileMode: FileDialog.OpenFile // 明确指定为打开单个文件模式
+            nameFilters: ["音乐文件 (*.mp3 *.wav *.flac *.m4a)"]
+            folder: Qt.resolvedUrl(".")
+            onAccepted: {
+                musicPlayer.addSongsFromFolder(fileUrl);
+                // console.log("Selected folder:", fileUrl.toString());
+            }
+        }
+        // --- 1. 顶部歌单信息区 ---
+        PlaylistHeader {
+            Layout.fillWidth: true
+        }
+        // --- 1. 导航栏 (TabBar) ---
+        TabBar {
+            id: tabBar
+            Layout.fillWidth: true
+
+            // TabButton 是 TabBar 的子项，代表每个标签
+            TabButton {
+                id: songTab1
+                text: "歌曲 " + songModel.count // 显示歌曲数量
+                contentItem: Text {
+                    text: songTab1.text
+                    font.pixelSize: 18
+                    font.bold: songTab1.checked // 选中时加粗
+                    color: songTab1.checked ? "white" : "#AAAAAA" // 选中时为白色
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                // --- 核心：下划线指示器 ---
+                indicator: Rectangle {
+                    width: 24 // 指示器宽度
+                    height: 3
+                    color: "#EC4141" // 红色
+                    radius: 2
+                    // 让指示器在 x 轴上平滑移动
+                    // TabBar 会自动管理它的 x 和 width，我们只需要添加动画
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 250
+                            easing.type: Easing.InOutCubic
+                        }
+                    }
+                }
+            }
+            TabButton {
+                id: songTab2
+                text: "评论"
+            }
+            TabButton {
+                id: songTab3
+                text: "收藏者"
+            }
+            // --- 弹簧 ---
+            Item {
+                Layout.fillWidth: true
+            }
+
+            // --- 搜索框 ---
+            TextField {
+                placeholderText: "搜索"
+                Layout.preferredWidth: 180
+                Layout.preferredHeight: 32
+                background: Rectangle {
+                    color: "#2A2A2A"
+                    radius: height / 2
+                }
+                // ... (可以添加搜索图标)
+            }
+            // --- 自定义外观 ---
+            background: Rectangle {
+                color: "transparent"
+            }
+        }
+        // --- 2. 内容区 (StackLayout) ---
+        StackLayout {
+            id: stackLayout
+            Layout.fillWidth: true
+            Layout.fillHeight: true // 占据所有剩余空间
+
+            // --- 核心：将 StackLayout 的当前索引与 TabBar 同步 ---
+            currentIndex: tabBar.currentIndex
+            ColumnLayout {
+                // --- 3. 歌曲列表表头 ---
+                RowLayout {
+                    id: songListHeader
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 10
+                    Layout.rightMargin: 10
+                    Layout.preferredHeight: 20
+
+                    // --- “#” 列 (无变化) ---
+                    Rectangle {
+                        // Layout.fillWidth: true
+                        Layout.preferredHeight: 30
+                        Layout.preferredWidth: 30
+                        Layout.alignment: Qt.AlignVCenter // 垂直居中
+                        color: "transparent" // 背景色
+                        Label {
+                            text: "#"
+                            color: "#888"
+                            // Layout.preferredWidth: 30
+                            // Layout.alignment: Qt.AlignVCenter
+                        }
+                    }
+                    // ✅ 使用一个 Item 作为根容器，因为它没有默认外观，最适合做容器
+                    Item {
+                        id: titleHeaderItem
+                        Layout.preferredWidth: 550 // 设置标题列的宽度
+                        Layout.preferredHeight: 30 // 增加一点高度以容纳边距和圆角
+                        Layout.alignment: Qt.AlignVCenter // 垂直居中
+                        // 1. ✅ 背景和边框层 (放在最底层)
+                        // 我们将在这里实现圆角边框和悬浮时的背景色
+                        Rectangle {
+                            id: hoverBackground // 给它一个 id，以便 State 可以引用
+                            anchors.fill: parent
+                            // --- 圆角边框实现 ---
+                            radius: 8 // 圆角半径
+                            color: "transparent" // 默认背景是透明的
+                            border.color: "transparent" // 默认边框也是透明的
+                            border.width: 1
+                        }
+
+                        // 2. ✅ 内容层 (RowLayout)
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12 // 内边距，让内容和边框有距离
+                            anchors.rightMargin: 12
+                            spacing: 8
+                            Label {
+                                id: titleLabel
+                                text: "标题"
+                                color: "#888"
+                                font.pixelSize: 14
+                            }
+
+                            Label {
+                                id: sortIndicatorLabel
+                                text: "↓默认排序" // 使用图标/符号更佳
+                                color: "white"
+                                font.pixelSize: 16
+                                opacity: 0 // ✅ 默认隐藏
+                            }
+                            Item {
+                                Layout.fillWidth: true // 让这个 Item 填充所有可用空间
+                            }
+                        }
+
+                        // 3. ✅ 交互层 (MouseArea，放在最顶层)
+                        MouseArea {
+                            id: mouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        // 4. ✅ 状态管理 (使用 State)
+                        // 这是控制所有视觉变化的核心
+                        states: [
+                            State {
+                                name: "hovered"
+                                // 当 MouseArea 的 hoverEnabled 为 true 且鼠标在上面时，进入此状态
+                                when: mouseArea.containsMouse
+
+                                // 定义进入 "hovered" 状态时，各个属性应该变成什么样
+                                PropertyChanges {
+                                    target: hoverBackground
+                                    color: "#3C444C" // 背景色变为深灰
+                                }
+                                PropertyChanges {
+                                    target: titleLabel
+                                    color: "white" // 标题文本变白
+                                }
+                                PropertyChanges {
+                                    target: sortIndicatorLabel
+                                    opacity: 1 // 排序指示器显示出来
+                                }
+                            }
+                        ]
+
+                        // 5. ✅ 动画过渡 (使用 Transition)
+                        // 定义从一个状态到另一个状态的变化过程
+                        transitions: [
+                            Transition {
+                                // 为所有颜色和透明度的变化应用平滑动画
+                                ColorAnimation {
+                                    duration: 200
+                                }
+                                NumberAnimation {
+                                    properties: "opacity"
+                                    duration: 200
+                                }
+                            }
+                        ]
+                    }
+                    // --- “专辑” 列 (无变化) ---
+                    Item {
+                        id: albumHeaderItem
+                        // Layout.fillWidth: true
+                        Layout.preferredWidth: 150 // 设置专辑列的宽度
+                        Layout.preferredHeight: 30 // 增加一点高度以容纳边距和圆角
+                        Layout.alignment: Qt.AlignVCenter // 垂直居中
+                        // 1. ✅ 背景和边框层 (放在最底层)
+                        // 我们将在这里实现圆角边框和悬浮时的背景色
+                        Rectangle {
+                            id: hoverBackground1 // 给它一个 id，以便 State 可以引用
+                            anchors.fill: parent
+                            // --- 圆角边框实现 ---
+                            radius: 8 // 圆角半径
+                            color: "transparent" // 默认背景是透明的
+                            border.color: "transparent" // 默认边框也是透明的
+                            border.width: 1
+                        }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12 // 内边距，让内容和边框有距离
+                            anchors.rightMargin: 12
+                            spacing: 8
+                            Label {
+                                id: titleLabel1
+                                text: "标题"
+                                color: "#888"
+                                font.pixelSize: 14
+                            }
+
+                            Label {
+                                id: sortIndicatorLabel1
+                                text: "↓默认排序" // 使用图标/符号更佳
+                                color: "white"
+                                font.pixelSize: 16
+                                opacity: 0 // ✅ 默认隐藏
+                            }
+                            Item {
+                                Layout.fillWidth: true // 让这个 Item 填充所有可用空间
+                            }
+                        }
+                        // 3. ✅ 交互层 (MouseArea，放在最顶层)
+                        MouseArea {
+                            id: mouseArea1
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        // 4. ✅ 状态管理 (使用 State)
+                        // 这是控制所有视觉变化的核心
+                        states: [
+                            State {
+                                name: "hovered"
+                                // 当 MouseArea 的 hoverEnabled 为 true 且鼠标在上面时，进入此状态
+                                when: mouseArea.containsMouse
+
+                                // 定义进入 "hovered" 状态时，各个属性应该变成什么样
+                                PropertyChanges {
+                                    target: hoverBackground1
+                                    color: "#3C444C" // 背景色变为深灰
+                                }
+                                PropertyChanges {
+                                    target: titleLabel1
+                                    color: "white" // 标题文本变白
+                                }
+                                PropertyChanges {
+                                    target: sortIndicatorLabel1
+                                    opacity: 1 // 排序指示器显示出来
+                                }
+                            }
+                        ]
+
+                        // 5. ✅ 动画过渡 (使用 Transition)
+                        // 定义从一个状态到另一个状态的变化过程
+                        transitions: [
+                            Transition {
+                                // 为所有颜色和透明度的变化应用平滑动画
+                                ColorAnimation {
+                                    duration: 200
+                                }
+                                NumberAnimation {
+                                    properties: "opacity"
+                                    duration: 200
+                                }
+                            }
+                        ]
+                    }
+
+                    // --- “喜欢” 列 (无变化) ---
+                    Label {
+                        text: "喜欢"
+                        color: "#888"
+                        Layout.preferredWidth: 30
+                    }
+
+                    // --- “时长” 列 (无变化) ---
+                    Item {
+                        id: durationHeaderItem
+                        Layout.preferredWidth: 50
+                        Layout.preferredHeight: 30 // 增加一点高度以容纳边距和圆角
+                        Layout.alignment: Qt.AlignVCenter // 垂直居中
+                        // 1. ✅ 背景和边框层 (放在最底层)
+                        // 我们将在这里实现圆角边框和悬浮时的背景色
+                        Rectangle {
+                            id: hoverBackground2 // 给它一个 id，以便 State 可以引用
+                            anchors.fill: parent
+                            radius: 8 // 圆角半径
+                            color: "transparent" // 默认背景是透明的
+                            border.color: "transparent" // 默认边框也是透明的
+                            border.width: 1
+                        }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12 // 内边距，让内容和边框有距离
+                            anchors.rightMargin: 12
+                            spacing: 8
+                            Label {
+                                id: titleLabel2
+                                text: "标题"
+                                color: "#888"
+                                font.pixelSize: 14
+                            }
+
+                            Label {
+                                id: sortIndicatorLabel2
+                                text: "↓默认排序" // 使用图标/符号更佳
+                                color: "white"
+                                font.pixelSize: 16
+                                opacity: 0 // ✅ 默认隐藏
+                            }
+                            Item {
+                                Layout.fillWidth: true // 让这个 Item 填充所有可用空间
+                            }
+                        }
+                        // 3. ✅ 交互层 (MouseArea，放在最顶层)
+                        MouseArea {
+                            id: mouseArea2
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        // 4. ✅ 状态管理 (使用 State)
+                        // 这是控制所有视觉变化的核心
+                        states: [
+                            State {
+                                name: "hovered"
+                                // 当 MouseArea 的 hoverEnabled 为 true 且鼠标在上面时，进入此状态
+                                when: mouseArea.containsMouse
+
+                                // 定义进入 "hovered" 状态时，各个属性应该变成什么样
+                                PropertyChanges {
+                                    target: hoverBackground2
+                                    color: "#3C444C" // 背景色变为深灰
+                                }
+                                PropertyChanges {
+                                    target: titleLabel2
+                                    color: "white" // 标题文本变白
+                                }
+                                PropertyChanges {
+                                    target: sortIndicatorLabel2
+                                    opacity: 1 // 排序指示器显示出来
+                                }
+                            }
+                        ]
+
+                        // 5. ✅ 动画过渡 (使用 Transition)
+                        // 定义从一个状态到另一个状态的变化过程
+                        transitions: [
+                            Transition {
+                                // 为所有颜色和透明度的变化应用平滑动画
+                                ColorAnimation {
+                                    duration: 200
+                                }
+                                NumberAnimation {
+                                    properties: "opacity"
+                                    duration: 200
+                                }
+                            }
+                        ]
+                    }
+                }
+
+                // --- 4. 歌曲列表 ---
+                ListView {
+                    id: songListView
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    model: musicPlayer.playlistModel
+                    spacing: 5
+                    clip: true
+
+                    delegate: SongItem1 {
+                        // 将模型数据绑定到 delegate
+                        width: parent.width
+                        required property int index
+                        required property int rank
+                        required property string title
+                        required property string album
+                        required property string artist
+                        required property string duration
+                        required property string coverSource
+                        rank: index + 1
+                        title1: title
+                        artist: artist
+                        album: album
+                        duration: duration
+                        coverSource: coverSource
+                        onClicked: {
+                            musicPlayer.play(index);
+                        }
+                        Component.onCompleted: {
+                            // 这里可以执行一些初始化代码
+                            console.log("SongItem1 created for:", title1, "by", artist, "at index", index);
+                        }
+                    }
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                    }
+                }
+            }
+        }
+    }
+}

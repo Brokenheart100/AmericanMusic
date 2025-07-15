@@ -10,7 +10,13 @@ Rectangle {
     height: 90
     width: parent.width
     color: "#16161A" // 深邃的背景色
+    property string coverSource: {
+        // 1. 生成 0 到 50 之间的随机整数
+        var randomNumber = Math.floor(Math.random() * 51); // Math.random() * (max + 1)
 
+        // 2. 构造文件路径字符串
+        return "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/" + randomNumber + ".jpg";
+    }
     ColumnLayout {
         anchors.fill: parent
         spacing: 10 // 进度条和内容栏之间不需要间距
@@ -81,6 +87,9 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 SongInfo {
                     id: songInfoArea
+                    coverSource: musicPlayer.currentCoverSource // <-- 关键绑定！
+                    title: musicPlayer.playlistModel.get(musicPlayer.currentIndex).title // (示例)
+                    artist: musicPlayer.playlistModel.get(musicPlayer.currentIndex).artist // (示例)
                 }
                 IconButton1 {
                     iconSource: "file:///E:/Computer/Qt6/AmericanMusic/svg/playstation-fill.svg"
