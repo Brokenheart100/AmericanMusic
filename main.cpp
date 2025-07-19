@@ -21,6 +21,5 @@ int main(int argc, char *argv[])
         { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
     engine.loadFromModule("AmericanMusic", "Main");
-    QString svgAbsPath = PathUtils::getSvgDirectoryPath();
     return app.exec();
 }

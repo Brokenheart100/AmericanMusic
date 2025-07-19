@@ -26,84 +26,50 @@ Rectangle {
         Slider {
             id: progressBar
             Layout.fillWidth: true
-            Layout.preferredHeight: 1 // 保持一个较大的可点击区域
+            Layout.preferredHeight: 2 // 设置进度条的高度
             from: 0
-            to: musicPlayer.duration > 0 ? musicPlayer.duration : 1
+            to: musicPlayer.duration
             value: musicPlayer.position
+
             onMoved: {
                 musicPlayer.setPosition(value);
             }
 
-            // 1. 仍然用一个空的 Item 覆盖掉系统默认的 handle
-            handle: Item {}
-
-            // 2. 在 background 中构建所有视觉元素
+            // --- 核心修正：自定义 background 和 handle ---
             background: Rectangle {
                 id: progressBarBackground
+                // 让背景填满 Slider 的可用空间
+                // Slider 会自动为 handle 留出空间，所以我们限制一下
                 width: parent.width
-                height: 4
+                height: 3
                 anchors.verticalCenter: parent.verticalCenter
                 color: "#555"
-                radius: 2
 
-                // 已播放的部分
                 Rectangle {
-                    id: playedProgress
-                    width: progressBar.visualPosition * parent.width
+                    // 已播放的部分
+                    width: progressBar.visualPosition * progressBarBackground.width
                     height: parent.height
                     color: "#EF4444"
-                    radius: parent.radius
                 }
 
-                // ✅ 步骤 1: 创建我们自己的、可自定义的滑块 (handle)
-                Rectangle {
-                    id: customHandle
-
-                    // 尺寸和颜色
-                    width: 12
-                    height: 12
-                    color: "#EF4444" // 红色
-                    radius: width / 2 // 使其成为圆形
-
-                    // ✅ 步骤 2: 将滑块的位置与进度条的进度绑定
-                    // Y 轴：使其在进度条上垂直居中
-                    y: parent.height / 2 - height / 2
-                    // X 轴：使其 x 坐标与已播放进度的末端对齐
-                    x: playedProgress.width - (width / 2) // 减去自身宽度的一半，使其中心对齐
-
-                    // ✅ 步骤 3: 默认隐藏滑块
-                    opacity: 0
-
-                    // 添加平滑的显示/隐藏动画
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: 150
-                        }
-                    }
-                }
-
-                // 3. MouseArea 覆盖整个背景，用于交互
+                // --- 在背景上覆盖一个 MouseArea 来处理点击和拖动 ---
                 MouseArea {
-                    id: progressBarMouseArea // 给它一个明确的 id
                     anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                    cursorShape: Qt.PointingHandCursor // 悬浮时显示手形光标
 
-                    // ✅ 步骤 4: 用 MouseArea 的状态来控制滑块的可见性
-                    onEntered: {
-                        customHandle.opacity = 1; // 鼠标进入时，显示滑块
-                    }
-                    onExited: {
-                        customHandle.opacity = 0; // 鼠标离开时，隐藏滑块
-                    }
-
-                    // onPositionChanged: mouse => handleMouse(mouse)
+                    // 当鼠标按下或拖动时触发
+                    onPositionChanged: mouse => handleMouse(mouse)
                     onPressed: mouse => handleMouse(mouse)
 
                     function handleMouse(mouse) {
+                        // 计算点击位置在进度条上的百分比
                         var positionRatio = mouse.x / progressBarBackground.width;
+
+                        // 确保百分比在 0.0 到 1.0 之间
                         positionRatio = Math.max(0.0, Math.min(1.0, positionRatio));
-                        progressBar.value = positionRatio * progressBar.to;
+                        musicPlayer.setPosition(positionRatio * progressBar.to);
+
+                    // 调用全局播放器进行 seek 操作
                     }
                 }
             }

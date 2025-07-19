@@ -52,6 +52,7 @@ ScrollView {
                 HoverCard {
                     Layout.preferredWidth: 150 // 给一个建议宽度
                     Layout.preferredHeight: 200 // 和建议高度
+                    radius: 20
                 }
                 HoverCard {
                     Layout.preferredWidth: 150 // 给一个建议宽度

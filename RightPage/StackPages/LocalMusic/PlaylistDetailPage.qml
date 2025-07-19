@@ -85,7 +85,6 @@ Rectangle {
             folder: Qt.resolvedUrl(".")
             onAccepted: {
                 musicPlayer.addSongsFromFolder(fileUrl);
-                // console.log("Selected folder:", fileUrl.toString());
             }
         }
         // --- 1. 顶部歌单信息区 ---

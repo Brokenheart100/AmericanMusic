@@ -15,6 +15,7 @@
 #include <taglib/xiphcomment.h>
 #include <QStandardPaths>
 #include <QFileInfo>
+
 class QAudioOutput;
 
 class MusicPlayer : public QObject
@@ -27,6 +28,7 @@ class MusicPlayer : public QObject
     Q_PROPERTY(QUrl currentCoverSource READ currentCoverSource NOTIFY currentSongChanged)
     Q_PROPERTY(QString currentTitle READ currentTitle NOTIFY currentSongChanged)
     Q_PROPERTY(QString currentArtist READ currentArtist NOTIFY currentSongChanged)
+
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(qint64 position READ position NOTIFY positionChanged)
 
@@ -37,9 +39,11 @@ public:
 
     PlaylistModel *playlistModel() const;
     int currentIndex() const;
+
     QUrl currentCoverSource() const;
     QString currentTitle() const;
     QString currentArtist() const;
+
     qint64 duration() const;
     qint64 position() const;
     QMediaPlayer::PlaybackState status() const;
@@ -55,6 +59,7 @@ public:
 signals:
     void currentIndexChanged();
     void currentSongChanged();
+
     void durationChanged();
     void positionChanged();
     void statusChanged();
@@ -67,13 +72,14 @@ private:
     QUrl saveEmbeddedCover(const QFileInfo &audioFileInfo);
     QString formatDuration(qint64 milliseconds);
 
+    QUrl extractCoverAsDataUrl(const QFileInfo &audioFileInfo);
+
     QMediaPlayer *m_player;
     QAudioOutput *m_audioOutput;
     PlaylistModel *m_playlistModel;
     int m_currentIndex;
     bool m_playOnLoaded = false;
 
-    QUrl m_currentCoverSource;
     PlaylistModel::Song m_currentSong;
 };
 

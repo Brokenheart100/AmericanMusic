@@ -53,7 +53,7 @@ Rectangle {
             Image { // 播放按钮
                 id: playIcon
                 anchors.centerIn: parent
-                source: root.coverSource1 // 一个灰色的播放图标
+                source: "file:///E:/Computer/Qt6/AmericanMusic/svg/play-fill.svg" // 一个灰色的播放图标
                 width: 24
                 height: 24
                 opacity: 0 // 默认隐藏

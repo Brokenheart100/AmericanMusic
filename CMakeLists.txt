@@ -74,6 +74,12 @@ qt_add_qml_module(appAmericanMusic
         SOURCES playlistmodel.h playlistmodel.cpp
         SOURCES musicplayer.h musicplayer.cpp
         QML_FILES RightPage/StackPages/LocalMusic/HeaderButton.qml
+        QML_FILES RightPage/StackPages/ChatPage/ChatPage.qml
+        QML_FILES RightPage/StackPages/ChatPage/MockData.qml
+        QML_FILES RightPage/StackPages/ChatPage/ConversationItem.qml
+        QML_FILES RightPage/StackPages/ChatPage/MessageDelegate.qml
+        QML_FILES RightPage/StackPages/ChatPage/ConversationListView.qml
+        QML_FILES RightPage/StackPages/ChatPage/ChatView.qml
 
 
 )

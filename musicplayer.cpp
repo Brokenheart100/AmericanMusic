@@ -33,15 +33,14 @@ QUrl MusicPlayer::saveEmbeddedCover(const QFileInfo &audioFileInfo)
     const TagLib::Tag *tag = fileRef.tag();
     QImage coverImage;
 
-    // --- 尝试 MP3 (ID3v2) ---
-    TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File *>(fileRef.file());
-    if (mpegFile && mpegFile->ID3v2Tag())
+    // 1. MP3 (ID3v2)
+    TagLib::ID3v2::Tag *id3v2Tag = dynamic_cast<TagLib::ID3v2::Tag *>(fileRef.tag());
+    if (id3v2Tag)
     {
-        const TagLib::ID3v2::FrameList frames = mpegFile->ID3v2Tag()->frameList("APIC");
-        if (!frames.isEmpty())
+        const auto frameList = id3v2Tag->frameList("APIC"); // APIC = Attached Picture
+        if (!frameList.isEmpty())
         {
-            auto picFrame = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
-            coverImage.loadFromData(reinterpret_cast<const uchar *>(picFrame->picture().data()), picFrame->picture().size());
+            auto picFrame = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frameList.front());
         }
     }
 
@@ -95,10 +94,74 @@ PlaylistModel *MusicPlayer::playlistModel() const
     return m_playlistModel;
 }
 
-QUrl MusicPlayer::currentCoverSource() const
+/**
+ * @brief 使用 TagLib 从音频文件中提取内嵌封面，并将其转换为 Base64 Data URL。
+ *
+ * Data URL 格式为 "data:image/jpeg;base64,..."，可以直接被 QML 的 Image 元素加载。
+ *
+ * @param audioFileInfo 指向音频文件的 QFileInfo 对象。
+ * @return QUrl 包含封面 Base64 数据的 Data URL，如果失败或没有封面则返回空 QUrl。
+ */
+QUrl MusicPlayer::extractCoverAsDataUrl(const QFileInfo &audioFileInfo)
 {
-    return m_currentCoverSource;
+    TagLib::FileRef fileRef(audioFileInfo.absoluteFilePath().toStdWString().c_str());
+    if (fileRef.isNull() || !fileRef.tag())
+    {
+        qWarning() << "TagLib: Could not read file or tag:" << audioFileInfo.fileName();
+        return QUrl();
+    }
+
+    // 创建一个辅助 Lambda 函数来处理转换，避免代码重复
+    auto createDataUrl = [](const TagLib::ByteVector &imageData, const TagLib::String &mimeType) -> QUrl
+    {
+        if (imageData.isEmpty())
+        {
+            return QUrl();
+        }
+
+        // 1. 将 TagLib 的 ByteVector 转为 QByteArray
+        QByteArray qImageData(imageData.data(), imageData.size());
+
+        // 2. 将 QByteArray 转为 Base64 编码
+        QByteArray base64Data = qImageData.toBase64();
+
+        // 3. 获取 MIME 类型
+        QString mimeTypeStr = QString::fromLatin1(mimeType.toCString(true));
+        if (mimeTypeStr.isEmpty())
+        {
+            mimeTypeStr = "image/jpeg"; // 如果MIME类型未知，提供一个安全的默认值
+        }
+
+        // 4. 组装成 Data URL 字符串
+        QString dataUrlString = QString("data:%1;base64,%2").arg(mimeTypeStr).arg(QString::fromLatin1(base64Data));
+
+        return QUrl(dataUrlString);
+    };
+
+    // --- 策略1: 尝试解析为 MP3 文件 (ID3v2 标签) ---
+    TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File *>(fileRef.file());
+    if (mpegFile && mpegFile->ID3v2Tag())
+    {
+        const TagLib::ID3v2::FrameList frames = mpegFile->ID3v2Tag()->frameList("APIC");
+        if (!frames.isEmpty())
+        {
+            auto picFrame = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
+            return createDataUrl(picFrame->picture(), picFrame->mimeType());
+        }
+    }
+
+    // --- 策略3: 尝试解析为 FLAC 文件 ---
+    TagLib::FLAC::File *flacFile = dynamic_cast<TagLib::FLAC::File *>(fileRef.file());
+    if (flacFile && !flacFile->pictureList().isEmpty())
+    {
+        const TagLib::FLAC::Picture *pic = flacFile->pictureList()[0];
+        return createDataUrl(pic->data(), pic->mimeType());
+    }
+
+    // 如果所有尝试都失败了，返回一个空 URL
+    return QUrl();
 }
+
 QString MusicPlayer::formatDuration(qint64 milliseconds)
 {
     qint64 totalSeconds = milliseconds / 1000;
@@ -109,6 +172,87 @@ QString MusicPlayer::formatDuration(qint64 milliseconds)
     return QString("%1:%2")
         .arg(minutes, 2, 10, QChar('0'))  // 分钟，至少2位，不足补0
         .arg(seconds, 2, 10, QChar('0')); // 秒，至少2位，不足补0
+}
+/**
+ * @brief 使用 TagLib 尝试从音频文件中提取内嵌封面。
+ *
+ * 如果成功，它会将封面保存到应用的缓存目录中，并返回一个本地文件的 QUrl。
+ * 如果失败或没有内嵌封面，它会返回一个空的 QUrl。
+ *
+ * @param audioFileInfo 指向音频文件的 QFileInfo 对象。
+ * @return QUrl 封面临时文件的路径，如果失败则为空。
+ */
+QUrl extractAndSaveEmbeddedCover(const QFileInfo &audioFileInfo)
+{
+    // 使用 TagLib::FileRef 打开文件。注意路径需要转换为 TagLib 接受的格式。
+    TagLib::FileRef fileRef(audioFileInfo.absoluteFilePath().toStdWString().c_str());
+
+    if (fileRef.isNull())
+    {
+        qDebug() << "TagLib: Could not open file" << audioFileInfo.fileName();
+        return QUrl(); // 文件打开失败，返回空
+    }
+
+    QImage coverImage;
+
+    // --- 策略1: 尝试解析为 MP3 文件 (ID3v2 标签) ---
+    // 我们使用 dynamic_cast 来安全地尝试将通用文件指针转换为特定的 MPEG 文件指针。
+    TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File *>(fileRef.file());
+    if (mpegFile && mpegFile->ID3v2Tag())
+    {
+        TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
+        // APIC 帧代表 "Attached Picture"
+        const TagLib::ID3v2::FrameList frames = id3v2tag->frameList("APIC");
+        if (!frames.isEmpty())
+        {
+            auto picFrame = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
+            // 从二进制数据加载 QImage
+            coverImage.loadFromData(reinterpret_cast<const uchar *>(picFrame->picture().data()), picFrame->picture().size());
+        }
+    }
+
+    // --- 策略2: 如果不是 MP3，尝试解析为 FLAC 文件 ---
+    if (coverImage.isNull())
+    {
+        TagLib::FLAC::File *flacFile = dynamic_cast<TagLib::FLAC::File *>(fileRef.file());
+        if (flacFile && !flacFile->pictureList().isEmpty())
+        {
+            const TagLib::FLAC::Picture *pic = flacFile->pictureList()[0]; // 获取第一张封面
+            coverImage.loadFromData(reinterpret_cast<const uchar *>(pic->data().data()), pic->data().size());
+        }
+    }
+
+    // --- 如果成功从任何一种格式中加载了图片，就保存它 ---
+    if (!coverImage.isNull())
+    {
+        // 1. 获取一个安全的可写目录（应用的缓存目录是最佳选择）
+        QString cachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/album_covers";
+        QDir cacheDir(cachePath);
+        if (!cacheDir.exists())
+        {
+            cacheDir.mkpath("."); // 如果目录不存在，就创建它
+        }
+
+        // 2. 创建一个可预测但不容易冲突的文件名
+        // (可以使用 hash 或者就是音频文件名)
+        QString coverFileName = audioFileInfo.completeBaseName() + ".jpg";
+        QString coverFilePath = cachePath + "/" + coverFileName;
+
+        // 3. 将 QImage 保存为 JPG 文件
+        if (coverImage.save(coverFilePath, "JPG"))
+        {
+            qDebug() << "TagLib: Saved embedded cover to" << coverFilePath;
+            // 4. 返回这个新创建的临时文件的 QUrl
+            return QUrl::fromLocalFile(coverFilePath);
+        }
+        else
+        {
+            qDebug() << "TagLib: Failed to save cover image for" << audioFileInfo.fileName();
+        }
+    }
+
+    // 如果所有尝试都失败了，返回一个空 URL
+    return QUrl();
 }
 void MusicPlayer::processFolder(const QString &folderPath)
 {
@@ -138,7 +282,6 @@ void MusicPlayer::processFolder(const QString &folderPath)
         if (!f.isNull() && f.tag())
         {
             TagLib::Tag *tag = f.tag();
-
             song.title = QString::fromUtf8(tag->title().toCString(true));
             song.artist = QString::fromUtf8(tag->artist().toCString(true));
             song.album = QString::fromUtf8(tag->album().toCString(true));
@@ -157,7 +300,7 @@ void MusicPlayer::processFolder(const QString &folderPath)
         }
         qDebug() << "Found song:" << song.title << "by" << song.artist << "from album" << song.album;
 
-                // 获取时长 (可选，QMediaPlayer 也可以做)
+        // 获取时长 (可选，QMediaPlayer 也可以做)
         if (!f.isNull() && f.audioProperties())
         {
             song.duration = f.audioProperties()->lengthInMilliseconds();
@@ -167,49 +310,15 @@ void MusicPlayer::processFolder(const QString &folderPath)
             song.duration = 0;
         }
 
-        // 1. 尝试提取内嵌封面
-        song.coverSource = saveEmbeddedCover(fileInfo);
-        // 2. 如果内嵌封面不存在，再尝试查找外部同名文件
+        // 1. 优先尝试提取内嵌封面
+        // song.coverSource = extractAndSaveEmbeddedCover(fileInfo);
+        song.coverSource = extractCoverAsDataUrl(fileInfo);
+        // 2. 如果内嵌封面不存在 (返回了空 URL)，再执行你的备用策略
         if (song.coverSource.isEmpty())
         {
-            QDir songDir = fileInfo.dir();
-            QString baseName = fileInfo.completeBaseName();
-            QFileInfo coverInfo(songDir, baseName + ".jpg");
-            if (coverInfo.exists())
-            {
-                song.coverSource = QUrl::fromLocalFile(coverInfo.absoluteFilePath());
-            }
-            else
-            {
-                coverInfo.setFile(songDir, baseName + ".png");
-                if (coverInfo.exists())
-                {
-                    song.coverSource = QUrl::fromLocalFile(coverInfo.absoluteFilePath());
-                }
-            }
-        }
-
-        // 查找同名封面
-        QFileInfo coverInfo(fileInfo.dir(), fileInfo.completeBaseName() + ".jpg");
-        if (coverInfo.exists())
-        {
-            song.coverSource = QUrl::fromLocalFile(coverInfo.absoluteFilePath());
-        }
-        else
-        {
-            coverInfo.setFile(fileInfo.dir(), fileInfo.completeBaseName() + ".png");
-            if (coverInfo.exists())
-            {
-                song.coverSource = QUrl::fromLocalFile(coverInfo.absoluteFilePath());
-            }
-            else
-            {
-                int randomIndex = QRandomGenerator::global()->bounded(51);
-
-                // 设置封面路径（使用QUrl::fromLocalFile处理本地文件路径）
-                song.coverSource = QUrl::fromLocalFile(
-                    QString("E:/Computer/Qt6/AmericanMusic/CoverImage/%1.jpg").arg(randomIndex));
-            }
+            int randomIndex = QRandomGenerator::global()->bounded(51);
+            song.coverSource = QUrl::fromLocalFile(
+                QString("E:/Computer/Qt6/AmericanMusic/CoverImage/%1.jpg").arg(randomIndex));
         }
         foundSongs.append(song);
     }
@@ -253,6 +362,10 @@ QString MusicPlayer::currentArtist() const
 {
     return m_currentSong.artist;
 }
+QUrl MusicPlayer::currentCoverSource() const
+{
+    return m_currentSong.coverSource;
+}
 void MusicPlayer::play(int index)
 {
     if (index < 0 || index >= m_playlistModel->rowCount())
@@ -260,13 +373,15 @@ void MusicPlayer::play(int index)
         return;
     }
     m_currentIndex = index;
-    emit currentIndexChanged();
     m_playOnLoaded = true;
-
     // ✅ 步骤 2: 在播放新歌曲时，获取封面 URL 并更新属性
-    PlaylistModel::Song currentSong = m_playlistModel->getSong(index);
-    m_player->setSource(currentSong.path);
+    m_currentSong = m_playlistModel->getSong(index);
 
+    // ✅ 然后再发出信号
+    emit currentIndexChanged();
+    emit currentSongChanged();
+
+    m_player->setSource(m_currentSong.path);
     m_player->play();
 }
 

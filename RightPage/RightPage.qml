@@ -6,7 +6,7 @@ Rectangle {
     id: rightPage
     Component.onCompleted: {
         console.log("RightPage initialized");
-        setCurrentPage(1); // 默认显示音乐精选页面
+        setCurrentPage(2); // 默认显示音乐精选页面
     }
     // --- 声明 UI 结构 ---
     StackView {
@@ -21,6 +21,10 @@ Rectangle {
             id: playlistDetailPage
             PlaylistDetailPage {}
         }
+        Component {
+            id: chatPage
+            ChatPage {}
+        }
         initialItem: MusicCherryPick {}
     }
 
@@ -30,15 +34,10 @@ Rectangle {
             mainStackView.replace(musicCherryPick);
         } else if (index === 1) {
             mainStackView.replace(playlistDetailPage);
+        } else if (index === 2) {
+            mainStackView.replace(chatPage);
         } else {
             console.warn("未知的页面索引:", index);
         }
-    }
-
-    function showPlaylist(playlistId) {
-    // 这个函数用于打开特定的歌单详情页
-    // mainStackView.push(playlistPage, {
-    //     "playlistId": playlistId
-    // }); // 可以传递参数
     }
 }
