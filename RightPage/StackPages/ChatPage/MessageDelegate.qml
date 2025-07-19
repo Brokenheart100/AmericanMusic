@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -5,101 +6,151 @@ import QtQuick.Controls
 Item {
     id: root
     width: parent.width
-    implicitHeight: contentRow.implicitHeight + 15 // 动态计算高度
+    // 让 delegate 的高度由内部 StackLayout 动态决定
+    implicitHeight: layoutSwitcher.implicitHeight
 
-    // 公共属性
-    property string msgType: "system"
-    property string author: "nmd"
-    property string text: "fuck"
-    property url avatar: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/25.jpg"
+    // --- 属性定义 ---
+    property string msgType: "received"
+    property string author: ""
+    property string text: ""
+    property url avatar: ""
+    property string timestamp: ""
 
-    RowLayout {
-        id: contentRow
-        width: parent.width
-        spacing: 15
-        // 如果是系统消息
-        Label {
-            visible: root.msgType === "system"
-            text: root.text
-            color: "#AAA"
-            background: Rectangle {
-                color: "#E0E0E0"
-                radius: 4
-            }
-            padding: 4
-            Layout.alignment: Qt.AlignHCenter
-        }
-
-        // 如果是接收的消息
-        Item {
-            visible: root.msgType === "incoming"
-            Layout.maximumWidth: parent.width * 0.6
-            Layout.leftMargin: 15
-
+    // --- 组件定义 (将每个布局封装成一个组件，非常清晰) ---
+    // 边框
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent" // 透明背景，只显示边框
+        border.color: "gray"
+        border.width: 1
+        radius: 4 // 圆角边框
+    }
+    // 1. 接收消息的布局组件
+    Component {
+        id: receivedMessageLayout
+        RowLayout {
+            spacing: 10
+            // 头像
             Image {
                 source: root.avatar
-                width: 40
-                height: 40
+                Layout.preferredWidth: 40
+                Layout.preferredHeight: 40
+                fillMode: Image.PreserveAspectCrop
                 clip: true
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.width / 2
-                    color: "transparent"
-                }
             }
+            // 消息体
             ColumnLayout {
+                Layout.maximumWidth: root.width * 0.65 // 消息体最大宽度
+                spacing: 5
+                // 作者
                 Label {
                     text: root.author
-                    color: "#888"
+                    color: "#666"
+                    font.pixelSize: 12
                 }
+                // 白色气泡
                 Rectangle {
                     color: "white"
                     radius: 8
+                    implicitWidth: messageLabel.implicitWidth + 20
+                    implicitHeight: messageLabel.implicitHeight + 20
                     Label {
+                        id: messageLabel
                         text: root.text
+                        anchors.fill: parent
                         anchors.margins: 10
+                        wrapMode: Text.WordWrap
                     }
                 }
             }
-        }
-
-        // 如果是发送的消息
-        Item {
-            visible: root.msgType === "outgoing"
-            Layout.maximumWidth: parent.width * 0.6
-            Layout.rightMargin: 15
-            Layout.fillWidth: true
-
+            // 弹簧：把所有内容推到左边
             Item {
                 Layout.fillWidth: true
-            } // 弹簧
-            ColumnLayout {
-                Layout.alignment: Qt.AlignRight
+            }
+        }
+    }
+
+    // 2. 发送消息的布局组件
+    Component {
+        id: sentMessageLayout
+        RowLayout {
+            spacing: 10
+            // 弹簧：把所有内容推到右边
+            Item {
+                Layout.fillWidth: true
+            }
+            // 蓝色气泡
+            Rectangle {
+                Layout.maximumWidth: root.width * 0.65 // 消息体最大宽度
+                color: "#007BFF" // 蓝色
+                radius: 8
+                implicitWidth: messageLabel.implicitWidth + 20
+                implicitHeight: messageLabel.implicitHeight + 20
                 Label {
-                    text: root.author
-                    color: "#888"
-                    Layout.alignment: Qt.AlignRight
-                }
-                Rectangle {
-                    color: "#95EC69"
-                    radius: 8
-                    Label {
-                        text: root.text
-                        anchors.margins: 10
-                    }
+                    id: messageLabel
+                    text: root.text
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    wrapMode: Text.WordWrap
+                    color: "white" // 白色文字
                 }
             }
+            // 头像
             Image {
                 source: root.avatar
-                width: 40
-                height: 40
+                Layout.preferredWidth: 40
+                Layout.preferredHeight: 40
+                fillMode: Image.PreserveAspectCrop
                 clip: true
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.width / 2
-                    color: "transparent"
-                }
             }
+        }
+    }
+
+    // 3. 系统消息的布局组件
+    Component {
+        id: systemMessageLayout
+        RowLayout {
+            // 左右两个弹簧，实现完美居中
+            Item {
+                Layout.fillWidth: true
+            }
+            Label {
+                text: root.timestamp
+                color: "#999" // 灰色，不显眼
+                font.pixelSize: 12
+                padding: 10
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+        }
+    }
+
+    // --- 布局切换器 ---
+    StackLayout {
+        id: layoutSwitcher
+        anchors.fill: parent
+
+        // --- 核心逻辑：根据 msgType 切换当前显示的布局 ---
+        currentIndex: {
+            if (root.msgType === "received")
+                return 0;
+            if (root.msgType === "sending")
+                return 1;
+            if (root.msgType === "system")
+                return 2;
+            return 0; // 默认显示接收类型
+        }
+
+        // --- 按顺序放置三种布局的实例 ---
+        Loader {
+            sourceComponent: receivedMessageLayout
+        }
+        Loader {
+            sourceComponent: sentMessageLayout
+        }
+        Loader {
+            sourceComponent: systemMessageLayout
         }
     }
 }

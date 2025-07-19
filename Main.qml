@@ -41,15 +41,14 @@ Window {
         anchors.bottom: bottomRect.top
         color: "#4848e1"
     }
+
+    property bool isBottomBarVisible: false
     BottomBar {
         id: bottomRect
-        // height: 150
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        color: "#35df98"
+        color: "#252726"
+        // visible: mainWindow.isBottomBarVisible
     }
-    // MusicPlayer {
-    //     anchors.centerIn: parent
-    // }
 }

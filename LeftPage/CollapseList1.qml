@@ -46,7 +46,7 @@ ColumnLayout {
 
         // 旋转的V形图标
         Image {
-            source: "file:///E:/Computer/C/QMLTest/image/3.jpg"
+            source: "file:///E:/Computer/Qt6/AmericanMusic/image/4.jpg"
             Layout.preferredWidth: 18
             Layout.preferredHeight: 18
             // 根据展开状态旋转图标
@@ -72,7 +72,7 @@ ColumnLayout {
 
         // // 加号按钮
         Button {
-            icon.source: "file:///E:/Computer/C/QMLTest/image/3.jpg"
+            icon.source: "file:///E:/Computer/Qt6/AmericanMusic/image/2.jpg"
             icon.width: 18
             icon.height: 18
             background: Rectangle {

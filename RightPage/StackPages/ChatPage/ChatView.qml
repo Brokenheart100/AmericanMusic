@@ -7,19 +7,20 @@ Rectangle {
     color: "#EFEBE8"
     Layout.fillWidth: true
     Layout.fillHeight: true
+    Layout.margins: 10
 
     Image {
         // 背景图
         source: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/49.jpg"
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
-        opacity: 0.1
-        z: -1
+        opacity: 0
+        // z: -1
     }
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: 10
 
         Rectangle {
             // 标题栏
@@ -45,19 +46,19 @@ Rectangle {
         ListModel {
             id: messagesModel
             ListElement {
-                type1: "outgoing"
+                type1: "received"
                 author1: "[小号1] LV100 群主"
-                text1: "😆"
+                text1: "😆55555555555555555555555555555555555555555"
                 avatar1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/38.jpg"
             }
             ListElement {
-                type1: "outgoing"
+                type1: "sending"
                 author1: "[小号1] LV100 群主"
                 text1: "😆"
                 avatar1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/37.jpg"
             }
             ListElement {
-                type1: "outgoing"
+                type1: "system"
                 author1: "[小号1] LV100 群主"
                 text1: "😆"
                 avatar1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/35.jpg"
@@ -68,9 +69,20 @@ Rectangle {
                 text1: "😆"
                 avatar1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/31.jpg"
             }
+            ListElement {
+                type1: "outgoing"
+                author1: "[小号1] LV100 群主"
+                text1: "😆111111111111111111111111111111111111"
+                avatar1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/31.jpg"
+            }
+            ListElement {
+                type1: "outgoing"
+                author1: "[小号1] LV100 群主"
+                text1: "😆"
+                avatar1: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/31.jpg"
+            }
         }
         ListView {
-            // 消息区
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
@@ -81,19 +93,21 @@ Rectangle {
                 required property string author1
                 required property string text1
                 required property string avatar1
+                // Layout.fillWidth: true
+                width: parent.width
                 msgType: type1
                 author: author1
                 text: text1
                 avatar: avatar1
             }
-            ScrollIndicator.vertical: ScrollIndicator {}
         }
 
         Rectangle {
             // 输入区
             color: "#F5F5F5"
-            Layout.minimumHeight: 150
-            Layout.maximumHeight: 250
+            Layout.fillHeight: true
+
+            // Layout.minimumHeight: 150
             Layout.fillWidth: true
             border.color: "#E0E0E0"
             border.width: 1
