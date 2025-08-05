@@ -1,86 +1,158 @@
+// ContactsView.qml
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-Item {
-    id: root
-    width: parent.width
-    // 高度由 contentRow 自动计算，我们让 delegate 的高度等于它加上一些边距
-    implicitHeight: contentRow.implicitHeight + 16 // 上下各 8px 边距
+// 模拟数据：联系人列表
 
-    property string msgType: "system"
-    property string author: "nmd"
-    property string text: "fuck"
-    property url avatar: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/25.jpg"
-    property bool isSentMessage: msgType === "received" || msgType === "sending"
-    // 边框
-    Rectangle {
-        anchors.fill: parent
-        color: "transparent" // 透明背景，只显示边框
-        border.color: "gray"
-        border.width: 1
-        radius: 4 // 圆角边框
+/*!
+* @brief 联系人主页面
+* 包含左侧的好友/群组列表和右侧的内容显示区。
+*/
+RowLayout {
+    spacing: 5
+    ListModel {
+        id: contactsModel
+        // 分组 1
+        ListElement {
+            type: "group"
+            name: "我的设备 0/1"
+            isExpanded: true
+        }
+
+        // 分组 2
+        ListElement {
+            type: "group"
+            name: "【 ε-世界线】 22/29"
+            isExpanded: true
+        }
+        ListElement {
+            type: "contact"
+            name: "土豆"
+            avatar: "file:///E:/Computer/Qt6/AmericanMusic/svg/mail-fill.svg"
+        }
+        ListElement {
+            type: "contact"
+            name: "GLORY"
+            avatar: "file:///E:/Computer/Qt6/AmericanMusic/svg/mail-fill.svg"
+        }
+        ListElement {
+            type: "contact"
+            name: "Mr.王子"
+            avatar: "file:///E:/Computer/Qt6/AmericanMusic/svg/mail-fill.svg"
+        }
     }
-    RowLayout {
-        id: contentRow
-        layoutDirection: root.isSentMessage ? Qt.RightToLeft : Qt.LeftToRight
-        Layout.alignment: Qt.AlignTop
-        spacing: 10
-        Item {
-            Layout.fillWidth: root.isSentMessage
-        }
-        Image {
-            id: sentAvatarImage
-            source: root.avatar
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            visible: !root.isSentMessage
-            fillMode: Image.PreserveAspectCrop
-            clip: true
-        }
-        // 子项 2: 用户名和消息气泡
+
+    // --- 1. 左侧：联系人列表 ---
+    Rectangle {
+        Layout.preferredWidth: 250
+        Layout.fillHeight: true
+        color: "#F7F7F7"
+        border.color: "#E0E0E0"
+        border.width: 1
+
         ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 4 // 用户名和消息气泡之间的垂直间距
-            Label {
-                id: authorLabel
-                text: root.author
-                color: "#888"
-                font.pixelSize: 12
-            }
-            // 消息气泡
+            anchors.fill: parent
+            spacing: 0
+
+            // 顶部的好友/群聊切换栏
             Rectangle {
-                // 气泡的宽度应该由其父级 ColumnLayout 决定
-                // 但我们不希望它无限宽，所以它会自适应内容，同时受限于父级宽度
-                Layout.fillWidth: true // 让 Label 可以知道最大宽度以进行换行
-                implicitWidth: messageLabel.implicitWidth + 10// 左右各10px内边距
-                implicitHeight: messageLabel.implicitHeight + 16 // 上下各8px内边距
-                color: "white"
-                radius: 8
-                Label {
-                    id: messageLabel
-                    text: root.text
-                    // 使用 anchors 填满气泡，并留出内边距
-                    anchors.fill: parent
-                    anchors.margins: 8 // 上下左右各8px内边距
-                    // 关键：允许文本自动换行
-                    wrapMode: Text.WordWrap
-                    color: "black" // 明确指定文本颜色
+                Layout.preferredHeight: 50
+                Layout.fillWidth: true
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: 20
+                    Button {
+                        text: "好友"
+                        flat: true
+                        font.bold: true
+                    }
+                    Button {
+                        text: "群聊"
+                        flat: true
+                        enabled: false
+                    }
+                }
+            }
+
+            // 联系人列表
+            ListView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                model: contactsModel
+
+                delegate: Item {
+                    width: parent.width
+                    // 根据类型决定代理的高度
+                    height: model.type === "header" ? 30 : 50
+
+                    // 如果是分组标题
+                    Rectangle {
+                        visible: model.type === "header"
+                        width: parent.width
+                        height: 30
+                        color: "#F0F0F0"
+                        Text {
+                            text: "▶ " + model.name
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            font.pixelSize: 12
+                            color: "gray"
+                        }
+                    }
+
+                    // 如果是联系人
+                    RowLayout {
+                        visible: model.type === "contact"
+                        anchors.fill: parent
+                        anchors.leftMargin: 20
+
+                        Image {
+                            source: model.avatar
+                            Layout.preferredWidth: 36
+                            Layout.preferredHeight: 36
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        Text {
+                            text: model.name
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                    }
                 }
             }
         }
-        // 子项 1: 头像
-        Image {
-            id: avatarImage1
-            source: root.avatar
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            visible: root.isSentMessage
-            fillMode: Image.PreserveAspectCrop // 保持比例并裁剪，防止头像变形
-            clip: true // 裁剪超出部分，为圆角做准备
-        }
-        Item {
-            Layout.fillWidth: !root.isSentMessage
+    }
+
+    // --- 2. 右侧：内容区域 ---
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        color: "#FFFFFF"
+
+        // 占位符内容
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: 15
+
+            Image {
+                source: "file:///E:/Computer/Qt6/AmericanMusic/CoverImage/6.jpg" // 一个占位符图标
+                Layout.preferredWidth: 100
+                Layout.preferredHeight: 100
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            Text {
+                text: "打开世界的另一扇窗"
+                font.pointSize: 20
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            Text {
+                text: "主动一点，世界会更大。"
+                color: "gray"
+                Layout.alignment: Qt.AlignHCenter
+            }
         }
     }
 }

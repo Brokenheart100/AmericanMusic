@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(AmericanMusic VERSION 0.1 LANGUAGES CXX)
-
+set(CMAKE_PREFIX_PATH 
+    "D:/vcpkg/vcpkg/installed/x64-windows"  # vcpkg安装目录
+    CACHE PATH ""
+)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 COMPONENTS 
@@ -13,11 +16,13 @@ find_package(Qt6 COMPONENTS
     Core
     Multimedia
     Widgets
+    Sql
 REQUIRED)
 find_package(TagLib REQUIRED)
+# 查找FFmpeg组件
+find_package(FFmpeg REQUIRED)
 
-    
-    
+
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -80,7 +85,15 @@ qt_add_qml_module(appAmericanMusic
         QML_FILES RightPage/StackPages/ChatPage/MessageDelegate.qml
         QML_FILES RightPage/StackPages/ChatPage/ConversationListView.qml
         QML_FILES RightPage/StackPages/ChatPage/ChatView.qml
-
+        QML_FILES LoginComponent/LoginWidget.qml
+        QML_FILES RightPage/StackPages/ChatPage/ChatLeftBar.qml
+        QML_FILES RightPage/StackPages/ChatPage/IconDelegate.qml
+        QML_FILES RightPage/StackPages/ChatPage/ContactsView.qml
+        QML_FILES RightPage/StackPages/ChatPage/SuperChatView.qml
+        QML_FILES RightPage/StackPages/ChatPage/ChatViewPro.qml
+        QML_FILES RightPage/StackPages/ChatPage/ChatListPanel.qml
+        SOURCES ffmpeg/audiodecoder.h ffmpeg/audiodecoder.cpp
+        SOURCES ffmpeg/bufferqueue.h ffmpeg/bufferqueue.cpp
 
 )
 
@@ -94,7 +107,8 @@ set_target_properties(appAmericanMusic PROPERTIES
     MACOSX_BUNDLE TRUE
     # WIN32_EXECUTABLE TRUE
 )
-
+target_include_directories(appAmericanMusic PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(appAmericanMusic PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(appAmericanMusic
     PRIVATE 
     Qt6::Quick
@@ -105,6 +119,8 @@ target_link_libraries(appAmericanMusic
     Qt6::Widgets
     Qt::Core
     TagLib::tag 
+    Qt6::Sql
+    ${FFMPEG_LIBRARIES}
 )
 
 include(GNUInstallDirs)

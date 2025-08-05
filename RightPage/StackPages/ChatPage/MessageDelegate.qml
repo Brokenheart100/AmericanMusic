@@ -14,7 +14,7 @@ Item {
     property string author: ""
     property string text: ""
     property url avatar: ""
-    property string timestamp: ""
+    property string timestamp: "21:56"
 
     // --- 组件定义 (将每个布局封装成一个组件，非常清晰) ---
     // 边框
@@ -41,6 +41,8 @@ Item {
             // 消息体
             ColumnLayout {
                 Layout.maximumWidth: root.width * 0.65 // 消息体最大宽度
+                // Layout.preferredWidth: root.width * 0.8
+
                 spacing: 5
                 // 作者
                 Label {

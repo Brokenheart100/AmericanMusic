@@ -8,11 +8,17 @@ Window {
     height: 720
     visible: true
     title: qsTr("nmdmp")
-
+    TitleBar {
+        id: titleBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 40
+    }
     LeftPage {
         id: leftRect
         anchors.left: parent.left
-        anchors.top: parent.top
+        anchors.top: titleBar.bottom
         anchors.bottom: bottomRect.top
         width: 220
         // --- 核心联动：连接信号和槽 ---
@@ -26,13 +32,7 @@ Window {
             rightRect.setCurrentPage(index);
         }
     }
-    TitleBar {
-        id: titleBar
-        anchors.left: leftRect.right
-        anchors.right: parent.right
-        anchors.top: parent.top
-        height: 40
-    }
+
     RightPage {
         id: rightRect
         anchors.left: leftRect.right
